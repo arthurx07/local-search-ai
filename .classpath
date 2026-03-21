@@ -1,0 +1,7 @@
+<classpath>
+  <classpathentry kind="src" path="src"/>
+  <classpathentry kind="lib" path="lib/AIMA.jar" sourcepath="lib/aima"/>
+  <classpathentry kind="lib" path="lib/Desastres.jar" javadocpath="lib/desastres-javadoc"/>
+  <classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+  <classpathentry kind="output" path="bin"/>
+</classpath>
