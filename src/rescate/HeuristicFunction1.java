@@ -7,7 +7,7 @@ public class HeuristicFunction1 implements HeuristicFunction {
     // Nuestro hack para rastrear el mejor coste evaluado
     public static double mejorCoste = Double.MAX_VALUE;
 
-    public double getHeuristicValue(Object state) {
+public double getHeuristicValue(Object state) {
         Board board = (Board) state;
         double tiempoTotal = 0.0;
         
@@ -24,32 +24,24 @@ public class HeuristicFunction1 implements HeuristicFunction {
                 int grupoId = ruta[i];
                 
                 if (grupoId == -1) {
-                    // El helicóptero vuelve al centro
-                    double dist = Board.distancias[nodoActual][centroId];
-                    tiempoHeli += dist * 0.6; // A 100km/h, 1km = 0.6 minutos
-                    tiempoHeli += 10.0;       // Tarda 10 mins en descargar/repostar
-                    nodoActual = centroId;    // Actualizamos posición
+                    // Volver al centro: sumamos el viaje y los 10 mins SIEMPRE (sin IFs)
+                    tiempoHeli += Board.tiempoViaje[nodoActual][centroId] + 10.0;       
+                    nodoActual = centroId;    
                 } else {
-                    // El helicóptero va a rescatar a un grupo
-                    int nodoDestino = Board.numCentros + grupoId; // Offset en la matriz
-                    double dist = Board.distancias[nodoActual][nodoDestino];
-                    tiempoHeli += dist * 0.6;
-                    
-                    // Tiempo de cargar a las personas
-                    int personas = Board.personasPorGrupo[grupoId];
-                    int prioridad = Board.prioridadGrupo[grupoId];
-                    if (prioridad == 1) {
-                        tiempoHeli += personas * 2.0; // Doble de tiempo por heridos
-                    } else {
-                        tiempoHeli += personas * 1.0; 
-                    }
-                    nodoActual = nodoDestino; // Actualizamos posición
+                    // Viajar al grupo y recogerlo usando los tiempos precalculados
+                    int nodoDestino = Board.numCentros + grupoId; 
+                    tiempoHeli += Board.tiempoViaje[nodoActual][nodoDestino];
+                    tiempoHeli += Board.tiempoRecogidaPorGrupo[grupoId];
+                    nodoActual = nodoDestino; 
                 }
             }
+            
+            // Como siempre acaba en -1, le hemos sumado 10 mins extra al final de su jornada. Se los restamos.
+            tiempoHeli -= 10.0; 
+            
             tiempoTotal += tiempoHeli;
         }
         
-        // ¡Magia! Si este estado es el mejor que hemos visto, lo guardamos
         if (tiempoTotal < mejorCoste) {
             mejorCoste = tiempoTotal;
         }

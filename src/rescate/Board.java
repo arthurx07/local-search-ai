@@ -22,7 +22,11 @@ public class Board {
     // Índice 0 a numCentros-1 son los Centros.
     // Índice numCentros a numCentros+numGrupos-1 son los Grupos.
     // Así, si quieres la distancia del Centro 0 al Grupo 5: distancias[0][numCentros + 5]
-    public static double[][] distancias; 
+    public static double[][] distancias;
+
+    // NUEVAS ESTRUCTURAS DE ALTO RENDIMIENTO
+    public static int[] tiempoRecogidaPorGrupo;
+    public static double[][] tiempoViaje; 
 
     // ==========================================
     // 2. INICIALIZACIÓN ESTÁTICA
@@ -35,18 +39,26 @@ public class Board {
         
         personasPorGrupo = new int[numGrupos];
         prioridadGrupo = new int[numGrupos];
-        
+        tiempoRecogidaPorGrupo = new int[numGrupos];
         int totalNodos = numCentros + numGrupos;
         distancias = new double[totalNodos][totalNodos];
+        tiempoViaje = new double[totalNodos][totalNodos];
         
         // Generar los objetos de la librería usando la semilla
         Grupos gruposIA = new Grupos(numGrupos, seed);
         Centros centrosIA = new Centros(numCentros, numHelicopterosPorCentro, seed);
         
-        // 1. Rellenar los arrays de los grupos
+        // 1. Rellenar el tiempo de recogida precalculado (Ahorra el IF en la heurística)
         for (int i = 0; i < numGrupos; i++) {
-            personasPorGrupo[i] = gruposIA.get(i).getNPersonas(); // <-- CORREGIDO
+            personasPorGrupo[i] = gruposIA.get(i).getNPersonas();
             prioridadGrupo[i] = gruposIA.get(i).getPrioridad();
+            
+            // Calculamos el tiempo de rescate: 1 min por persona, o 2 mins si es prioridad 1
+            if (prioridadGrupo[i] == 1) {
+                tiempoRecogidaPorGrupo[i] = personasPorGrupo[i] * 2;
+            } else {
+                tiempoRecogidaPorGrupo[i] = personasPorGrupo[i] * 1;
+            }
         }
         
         // 2. Precalcular la matriz de distancias
@@ -65,16 +77,23 @@ public class Board {
             coordY[numCentros + i] = gruposIA.get(i).getCoordY();
         }
         
-        // Calcular la distancia euclídea entre todos los puntos
+// 2. Calcular distancias Y tiempos de viaje precalculados (Ahorra el * 0.6 en la heurística)
         for (int i = 0; i < totalNodos; i++) {
             for (int j = 0; j < totalNodos; j++) {
                 if (i == j) {
                     distancias[i][j] = 0.0;
+                    tiempoViaje[i][j] = 0.0;
                 } else {
                     double dx = coordX[i] - coordX[j];
                     double dy = coordY[i] - coordY[j];
                     // La distancia euclídea: sqrt(dx^2 + dy^2)
-                    distancias[i][j] = Math.sqrt(dx * dx + dy * dy);
+
+                    // 1. Calculamos y GUARDAMOS la distancia en la variable 'dist'
+                    double dist = Math.sqrt(dx * dx + dy * dy); 
+                    
+                    // 2. Ahora sí podemos usar 'dist' para las dos matrices
+                    distancias[i][j] = dist;
+                    tiempoViaje[i][j] = dist * 0.6;
                 }
             }
         }
@@ -266,7 +285,6 @@ public class Board {
         }
         return true;
     }
-
 
 
 }
