@@ -12,21 +12,24 @@ public class Main {
         System.out.println("=== INICIANDO BÚSQUEDA LOCAL ===");
         
         // 1. INICIALIZAR EL ESCENARIO
+        // TODO: Poner estos datos correctamente
         int numGrupos = 100;
         int numCentros = 5;
         int numHelicopteros = 1;
         int semilla = 1234;
         Board.inicializarDatosEstaticos(numGrupos, numCentros, numHelicopteros, semilla);
         
-        // 2. CREAR ESTADO INICIAL (1 = Greedy)
+        // 2. CREAR ESTADO INICIAL (0 = Aleatorio, 1 = Greedy)
         Board board = new Board(1);
         
         // 3. PROBAR LA HEURÍSTICA DEL ESTADO INICIAL
+        // TODO: Poder decidir entre heurísticas 1 y 2
         HeuristicFunction1 hf = new HeuristicFunction1();
         double costeInicial = hf.getHeuristicValue(board);
         System.out.println("Coste de la solución inicial Greedy: " + costeInicial + " minutos.");
 
         // 4. EJECUTAR ALGORITMO
+        // TODO: Poder decidir entre HC y SA
         DesastresHillClimbingSearch(board, costeInicial);
     }
 

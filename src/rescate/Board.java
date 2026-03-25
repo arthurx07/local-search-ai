@@ -77,7 +77,7 @@ public class Board {
             coordY[numCentros + i] = gruposIA.get(i).getCoordY();
         }
         
-// 2. Calcular distancias Y tiempos de viaje precalculados (Ahorra el * 0.6 en la heurística)
+        // 2. Calcular distancias Y tiempos de viaje precalculados (Ahorra el * 0.6 en la heurística)
         for (int i = 0; i < totalNodos; i++) {
             for (int j = 0; j < totalNodos; j++) {
                 if (i == j) {
@@ -124,7 +124,7 @@ public class Board {
         }
     }
 
-    // Constructor de copia para los sucesores (Rápido y profundo)
+    // Constructor de copia para los sucesores
     public Board(Board antiguo) {
         rutas = new int[numHelicopterosTotal][];
         for (int i = 0; i < numHelicopterosTotal; i++) {
@@ -138,6 +138,16 @@ public class Board {
     // ==========================================
     // 5. LÓGICA DE SOLUCIONES INICIALES
     // ==========================================
+    private void generarSolucionInicialAleatoria() {
+        // TODO: Solución inicial aleatoria
+        // estrategia: por cada grupo:
+        // - asignar aleatóriamente un helicóptero (de 1 a numHelicopterosTotal)
+        // - si al asignarle, se debe crear un nuevo viaje (por las condiciones), se crea.
+    }
+
+    // Criterio para la solución greedy inicial:
+    // - asignamos un grupo a un helicóptero de su centro más cercano
+    // - el helicóptero al que le asignaremos todos los viajes de ese centro es al mismo (el primero del centro)
     private void generarSolucionInicialGreedy() {
         // Estructura temporal para ir construyendo las rutas.
         // ArrayList facilita añadir elementos dinámicamente antes de pasarlo al array final primitivo.
@@ -257,6 +267,9 @@ public class Board {
     // ==========================================
     // 7. VALIDADOR DE ESTADO
     // ==========================================
+    // Comprobar que el estado actual es válido. Es decir, que el máximo de personas
+    // recogidas por un helicóptero en un viaje es 15 y el máximo de grupos
+    // recogidos por un helicóptero en un viaje es 3.
     public boolean esValido() {
         for (int h = 0; h < numHelicopterosTotal; h++) {
             if (rutas[h] == null) continue;
@@ -271,6 +284,7 @@ public class Board {
                     // Fin del viaje, reseteamos contadores
                     personasViaje = 0;
                     gruposViaje = 0;
+
                 } else {
                     // Añadimos carga al viaje
                     personasViaje += personasPorGrupo[grupoId];
