@@ -26,11 +26,12 @@ public class Main {
         int numCentros      = Integer.parseInt(params.getOrDefault("centros", "5"));
         int numHelicopteros = Integer.parseInt(params.getOrDefault("helicopteros", "1"));
         int semilla         = Integer.parseInt(params.getOrDefault("semilla", "1234"));
+        // semilla se usará para: distribución de grupos y centros; generación aleatoria del estado inicial
         Board.inicializarDatosEstaticos(numGrupos, numCentros, numHelicopteros, semilla);
         
         // 2. CREAR ESTADO INICIAL (0 = Aleatorio, 1 = Greedy)
-        String estado = params.getOrDefault("estado", "greedy");
-        int tipoEstado = estado.equals("aleatorio") ? 0 : 1;
+        String inicial = params.getOrDefault("inicial", "greedy");
+        int tipoEstado = inicial.equals("aleatorio") ? 0 : 1;
         Board board = new Board(tipoEstado);
         
         // 3. PROBAR LA HEURÍSTICA DEL ESTADO INICIAL
@@ -128,7 +129,7 @@ public class Main {
                     case 'c': map.put("centros", args[i + 1]); break;
                     case 'h': map.put("helicopteros", args[i + 1]); break;
                     case 's': map.put("semilla", args[i + 1]); break;
-                    case 'e': map.put("estado", args[i + 1]); break;
+                    case 'i': map.put("inicial", args[i + 1]); break;
                     case 'u': map.put("heuristica", args[i + 1]); break;
                     case 'a': map.put("algoritmo", args[i + 1]); break;
                     default:
@@ -152,7 +153,7 @@ public class Main {
         System.out.println("  -c --centros <n>                Número de centros (default 5)");
         System.out.println("  -h --helicopteros <n>           Número de helicópteros (default 1)");
         System.out.println("  -s --semilla <n>                Semilla aleatoria (default 1234)");
-        System.out.println("  -e --estado <greedy|aleatorio>  Estado inicial (default greedy)");
+        System.out.println("  -i --inicial <greedy|aleatorio> Generación del estado inicial (default greedy)");
         System.out.println("  -u --heuristica <1|2>           Heurística a usar (default 1)");
         System.out.println("  -a --algoritmo <hc|sa>          Algoritmo de búsqueda (default hc)");
         System.out.println("  -h --help                       Muestra esta ayuda");

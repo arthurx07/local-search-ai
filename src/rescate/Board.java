@@ -3,6 +3,7 @@ package rescate;
 import IA.Desastres.Grupos;
 import IA.Desastres.Centros;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Board {
 
@@ -13,6 +14,7 @@ public class Board {
     public static int numCentros;
     public static int numHelicopterosPorCentro;
     public static int numHelicopterosTotal;
+    public static int semilla;
     
     // Arrays para las características de los grupos
     public static int[] personasPorGrupo;
@@ -36,6 +38,7 @@ public class Board {
         numCentros = nCentros;
         numHelicopterosPorCentro = nHelicop;
         numHelicopterosTotal = nCentros * nHelicop;
+        semilla = seed;
         
         personasPorGrupo = new int[numGrupos];
         prioridadGrupo = new int[numGrupos];
@@ -45,8 +48,8 @@ public class Board {
         tiempoViaje = new double[totalNodos][totalNodos];
         
         // Generar los objetos de la librería usando la semilla
-        Grupos gruposIA = new Grupos(numGrupos, seed);
-        Centros centrosIA = new Centros(numCentros, numHelicopterosPorCentro, seed);
+        Grupos gruposIA = new Grupos(numGrupos, semilla);
+        Centros centrosIA = new Centros(numCentros, numHelicopterosPorCentro, semilla);
         
         // 1. Rellenar el tiempo de recogida precalculado (Ahorra el IF en la heurística)
         for (int i = 0; i < numGrupos; i++) {
@@ -115,12 +118,10 @@ public class Board {
     public Board(int tipoInicializacion) {
         rutas = new int[numHelicopterosTotal][];
         
-        if (tipoInicializacion == 1) {
+        if (tipoInicializacion == 0) {
+            generarSolucionInicialAleatoria(); 
+        } else if (tipoInicializacion == 1){
             generarSolucionInicialGreedy();
-        } else {
-            // Si el tipo es distinto de 1, podrías llamar a una solución puramente aleatoria.
-            // Por ahora, para que no falle si le pasas otro número, llamamos a la misma.
-            generarSolucionInicialGreedy(); 
         }
     }
 
@@ -138,11 +139,72 @@ public class Board {
     // ==========================================
     // 5. LÓGICA DE SOLUCIONES INICIALES
     // ==========================================
+
+    // estrategia: por cada grupo:
+    // - asignar aleatóriamente un helicóptero (de 1 a numHelicopterosTotal)
+    // - si al asignarle, se debe crear un nuevo viaje (por las condiciones), se crea.
     private void generarSolucionInicialAleatoria() {
-        // TODO: Solución inicial aleatoria
-        // estrategia: por cada grupo:
-        // - asignar aleatóriamente un helicóptero (de 1 a numHelicopterosTotal)
-        // - si al asignarle, se debe crear un nuevo viaje (por las condiciones), se crea.
+        ArrayList<ArrayList<Integer>> rutasTemp = new ArrayList<>();
+        for (int i = 0; i < numHelicopterosTotal; i++) {
+            rutasTemp.add(new ArrayList<>());
+        }
+
+        // Variables de control de estado actual por cada helicóptero
+        int[] personasActuales = new int[numHelicopterosTotal];
+        int[] gruposEnEsteViaje = new int[numHelicopterosTotal];
+
+        Random rnd = new Random(semilla);
+        // TODO: decidir qué semilla usar
+/*
+Objetivo	                                | Semilla recomendada
+Reproducibilidad (experimentos, informes)	| Semilla fija o pasada por parámetro
+Aleatoriedad real	                        | System.currentTimeMillis()
+Aleatoriedad fuerte	                      | SecureRandom
+Aleatoriedad dependiente del problema	    | Objects.hash(...)
+*/
+
+        // Recorremos todos los grupos a rescatar
+        for (int grupoId = 0; grupoId < numGrupos; grupoId++) {
+            int personas = personasPorGrupo[grupoId];
+
+            // 1. Elegir helicóptero aleatorio
+            int heliId = rnd.nextInt(numHelicopterosTotal);
+
+            // 2. Comprobar si cabe en el viaje actual
+            boolean cabeEnViajeActual = (personasActuales[heliId] + personas <= 15) && (gruposEnEsteViaje[heliId] < 3);
+
+            if (!cabeEnViajeActual) {
+                // Si no cabe, cerrar viaje si había grupos
+                if (gruposEnEsteViaje[heliId] > 0) {
+                    rutasTemp.get(heliId).add(-1);
+                }
+                // Resetear contadores para el nuevo viaje del helicóptero
+                personasActuales[heliId] = 0;
+                gruposEnEsteViaje[heliId] = 0;
+            }
+
+            // 3. Asignar grupo al helicóptero
+            rutasTemp.get(heliId).add(grupoId);
+            personasActuales[heliId] += personas;
+            gruposEnEsteViaje[heliId]++;
+        }
+
+        // 4. Cerrar viajes abiertos
+        for (int i = 0; i < numHelicopterosTotal; i++) {
+            ArrayList<Integer> rutaHeli = rutasTemp.get(i);
+            if (!rutaHeli.isEmpty() && rutaHeli.get(rutaHeli.size() - 1) != -1) {
+                rutaHeli.add(-1);
+            }
+        }
+
+        // 5. Convertir a array final rutas[][]
+        for (int i = 0; i < numHelicopterosTotal; i++) {
+            ArrayList<Integer> rutaHeli = rutasTemp.get(i);
+            rutas[i] = new int[rutaHeli.size()];
+            for (int j = 0; j < rutaHeli.size(); j++) {
+                rutas[i][j] = rutaHeli.get(j);
+            }
+        }
     }
 
     // Criterio para la solución greedy inicial:
