@@ -1,16 +1,16 @@
 # local-search-ai
-***TODO: ACTUALIZAR ESTE README.***
+***TODO: ACTUALIZAR ESTE README.***  
 FIB 2026 Q2 AI Local Search Project  
 
 Para correr el programa existen dos alternativas.  
 
-La primera es  
+La primera es:  
 ```
 make jar
 java -jar programa.jar
 ```
 
-La segunda es  
+La segunda es:  
 
 ```
 make run # ARGS="añadir aquí los argumentos"
