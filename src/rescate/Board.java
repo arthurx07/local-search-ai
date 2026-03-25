@@ -81,23 +81,26 @@ public class Board {
         }
         
         // 2. Calcular distancias Y tiempos de viaje precalculados (Ahorra el * 0.6 en la heurística)
+        // OPTIMIZACIÓN SIMÉTRICA: [i][j] = [j][i] (Ahorra el 50% de las raíces cuadradas)
         for (int i = 0; i < totalNodos; i++) {
-            for (int j = 0; j < totalNodos; j++) {
-                if (i == j) {
-                    distancias[i][j] = 0.0;
-                    tiempoViaje[i][j] = 0.0;
-                } else {
-                    double dx = coordX[i] - coordX[j];
-                    double dy = coordY[i] - coordY[j];
-                    // La distancia euclídea: sqrt(dx^2 + dy^2)
-
-                    // 1. Calculamos y GUARDAMOS la distancia en la variable 'dist'
-                    double dist = Math.sqrt(dx * dx + dy * dy); 
-                    
-                    // 2. Ahora sí podemos usar 'dist' para las dos matrices
-                    distancias[i][j] = dist;
-                    tiempoViaje[i][j] = dist * 0.6;
-                }
+            // La distancia de un nodo a sí mismo es 0
+            distancias[i][i] = 0.0;
+            tiempoViaje[i][i] = 0.0;
+           
+            // El bucle 'j' empieza en 'i + 1' para calcular solo la mitad superior de la matriz
+            for (int j = i + 1; j < totalNodos; j++) {
+                double dx = coordX[i] - coordX[j];
+                double dy = coordY[i] - coordY[j];
+              
+                double dist = Math.sqrt(dx * dx + dy * dy);
+                double tiempo = dist * 0.6; 
+                
+                // Asignamos el valor espejo instantáneamente
+                distancias[i][j] = dist;
+                distancias[j][i] = dist;
+                
+                tiempoViaje[i][j] = tiempo;
+                tiempoViaje[j][i] = tiempo;
             }
         }
     }
