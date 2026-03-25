@@ -145,7 +145,7 @@ public class Main {
     // ============================
     private static void printHelp() {
         System.out.println("Uso:");
-        System.out.println("  java Main opciones");
+        System.out.println("  java -jar programa.jar [opciones]");
         System.out.println();
         System.out.println("Opciones:");
         System.out.println("  -g --grupos <n>                 Número de grupos (default 100)");
