@@ -7,7 +7,7 @@ import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
-// import aima.search.informed.SimulatedAnnealingSearch;
+import aima.search.informed.SimulatedAnnealingSearch;
 
 public class Main {
 
@@ -47,18 +47,21 @@ public class Main {
             if (tipoHeuristica != 2) System.err.println("Función Heurística desconocida: " + tipoHeuristica);
         }
 
-        System.out.println("Coste de la solución inicial (" + tipoHeuristica + "):" + costeInicial + "minutos.");
+        System.out.println("Coste de la solución inicial (" + tipoHeuristica + "):" + costeInicial + " minutos.");
 
         // 5. DETERMINAR OPERADORES A USAR
         String operadores = params.getOrDefault("operadores", "swap+move");
         // TODO: Seleccionar operadores (swap / move / swap + move)
 
         // 4. EJECUTAR ALGORITMO
+
         String algoritmo = params.getOrDefault("algoritmo", "hc");
 
         if (algoritmo.equals("hc")) {
+        // 1. Ejecutamos Hill Climbing
             DesastresHillClimbingSearch(board, costeInicial);
         } else if (algoritmo.equals("sa")) {
+        // 2. Ejecutamos Simulated Annealing
             int steps     = Integer.parseInt(params.getOrDefault("steps", "2000"));
             int k         = Integer.parseInt(params.getOrDefault("k", "5"));
             double lambda = Double.parseDouble(params.getOrDefault("lambda", "0.001"));
@@ -73,7 +76,7 @@ public class Main {
     }
 
     private static void DesastresHillClimbingSearch(Board board, double costeInicial) {
-        System.out.println("\n--- Ejecutando Hill Climbing ---");
+        System.out.println("\n\n>>> Ejecutando HILL CLIMBING <<<");
         try {
             // TODO: Tener en cuenta Función Heurística (1 o 2)
             // Reiniciamos el rastreador por si hacemos varios experimentos
@@ -96,7 +99,6 @@ public class Main {
             // =======================================================
             // --- NUEVO CÓDIGO PARA IMPRIMIR EL COSTE FINAL ---
             // =======================================================
-
             System.out.println("--------------------------------------------------");
             System.out.println("¡Búsqueda Finalizada!");
             System.out.println("Coste Inicial: " + costeInicial + " minutos.");
@@ -118,7 +120,18 @@ public class Main {
     private static void DesastresSimulatedAnnealingSearch(Board board, double costeInicial) {
         System.out.println("\n--- Ejecutando Simulated Annealing ---");
         try {
-            // TODO
+            // Reiniciamos el rastreador de la heurística
+            HeuristicFunction1.mejorCoste = costeInicial;
+            
+            Problem problem = new Problem(board, new SuccessorFunctionSA(), new GoalTestFalse(), new HeuristicFunction1());
+            
+            // Parámetros: pasos máximos, iteraciones por paso de temp, factor K, ratio de caída Lambda
+            Search search = new SimulatedAnnealingSearch(2000, 100, 5, 0.001);
+            SearchAgent agent = new SearchAgent(problem, search);
+            
+            System.out.println(agent.getInstrumentation().toString());
+            System.out.println("Coste Final SA: " + HeuristicFunction1.mejorCoste + " minutos.");
+            
         } catch (Exception e) {
             e.printStackTrace();
         }
