@@ -61,6 +61,7 @@ public class Main {
     private static void DesastresHillClimbingSearch(Board board, double costeInicial) {
         System.out.println("\n--- Ejecutando Hill Climbing ---");
         try {
+            // TODO: Tener en cuenta Función Heurística
             // Reiniciamos el rastreador por si hacemos varios experimentos
             HeuristicFunction1.mejorCoste = costeInicial;
             
@@ -86,6 +87,9 @@ public class Main {
             System.out.println("Mejora total:  " + mejora + " minutos.");
             System.out.println("--------------------------------------------------");
             // =======================================================
+            
+            // PARA EXPERIMENTOS
+            System.out.println("COSTE=" + HeuristicFunction1.mejorCoste);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -127,7 +131,7 @@ public class Main {
                 switch (flag) {
                     case 'g': map.put("grupos", args[i + 1]); break;
                     case 'c': map.put("centros", args[i + 1]); break;
-                    case 'h': map.put("helicopteros", args[i + 1]); break;
+                    case 'o': map.put("helicopteros", args[i + 1]); break;
                     case 's': map.put("semilla", args[i + 1]); break;
                     case 'i': map.put("inicial", args[i + 1]); break;
                     case 'u': map.put("heuristica", args[i + 1]); break;
@@ -151,7 +155,7 @@ public class Main {
         System.out.println("Opciones:");
         System.out.println("  -g --grupos <n>                 Número de grupos (default 100)");
         System.out.println("  -c --centros <n>                Número de centros (default 5)");
-        System.out.println("  -h --helicopteros <n>           Número de helicópteros (default 1)");
+        System.out.println("  -o --helicopteros <n>           Número de helicópteros (default 1)");
         System.out.println("  -s --semilla <n>                Semilla aleatoria (default 1234)");
         System.out.println("  -i --inicial <greedy|aleatorio> Generación del estado inicial (default greedy)");
         System.out.println("  -u --heuristica <1|2>           Heurística a usar (default 1)");

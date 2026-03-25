@@ -25,7 +25,7 @@ Uso:
 Opciones:
   -g --grupos <n>                 Número de grupos (default 100)
   -c --centros <n>                Número de centros (default 5)
-  -h --helicopteros <n>           Número de helicópteros (default 1)
+  -o --helicopteros <n>           Número de helicópteros (default 1)
   -s --semilla <n>                Semilla aleatoria (default 1234)
   -i --inicial <greedy|aleatorio> Generación del estado inicial (default greedy)
   -u --heuristica <1|2>           Heurística a usar (default 1)
