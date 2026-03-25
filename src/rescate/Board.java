@@ -1,117 +1,272 @@
 package rescate;
 
+import IA.Desastres.Grupos;
+import IA.Desastres.Centros;
 import java.util.ArrayList;
-import java.util.Random;
 
-// clase que representa al Estado
-// It has to implement the state of the problem and its operators
 public class Board {
 
-    /// Número de grupos
-    private int ngroups;
+    // ==========================================
+    // 1. DATOS ESTÁTICOS (El escenario)
+    // ==========================================
+    public static int numGrupos;
+    public static int numCentros;
+    public static int numHelicopterosPorCentro;
+    public static int numHelicopterosTotal;
+    
+    // Arrays para las características de los grupos
+    public static int[] personasPorGrupo;
+    public static int[] prioridadGrupo;
+    
+    // Matriz de distancias precalculada
+    // Índice 0 a numCentros-1 son los Centros.
+    // Índice numCentros a numCentros+numGrupos-1 son los Grupos.
+    // Así, si quieres la distancia del Centro 0 al Grupo 5: distancias[0][numCentros + 5]
+    public static double[][] distancias; 
 
-    /* Constructor */
-    public Board(...) {
-
+    // ==========================================
+    // 2. INICIALIZACIÓN ESTÁTICA
+    // ==========================================
+    public static void inicializarDatosEstaticos(int nGrupos, int nCentros, int nHelicop, int seed) {
+        numGrupos = nGrupos;
+        numCentros = nCentros;
+        numHelicopterosPorCentro = nHelicop;
+        numHelicopterosTotal = nCentros * nHelicop;
+        
+        personasPorGrupo = new int[numGrupos];
+        prioridadGrupo = new int[numGrupos];
+        
+        int totalNodos = numCentros + numGrupos;
+        distancias = new double[totalNodos][totalNodos];
+        
+        // Generar los objetos de la librería usando la semilla
+        Grupos gruposIA = new Grupos(numGrupos, seed);
+        Centros centrosIA = new Centros(numCentros, numHelicopterosPorCentro, seed);
+        
+        // 1. Rellenar los arrays de los grupos
+        for (int i = 0; i < numGrupos; i++) {
+            personasPorGrupo[i] = gruposIA.get(i).getNPersonas(); // <-- CORREGIDO
+            prioridadGrupo[i] = gruposIA.get(i).getPrioridad();
+        }
+        
+        // 2. Precalcular la matriz de distancias
+        // Primero, extraemos las coordenadas temporalmente
+        int[] coordX = new int[totalNodos];
+        int[] coordY = new int[totalNodos];
+        
+        // Coordenadas de los centros
+        for (int i = 0; i < numCentros; i++) {
+            coordX[i] = centrosIA.get(i).getCoordX();
+            coordY[i] = centrosIA.get(i).getCoordY();
+        }
+        // Coordenadas de los grupos
+        for (int i = 0; i < numGrupos; i++) {
+            coordX[numCentros + i] = gruposIA.get(i).getCoordX();
+            coordY[numCentros + i] = gruposIA.get(i).getCoordY();
+        }
+        
+        // Calcular la distancia euclídea entre todos los puntos
+        for (int i = 0; i < totalNodos; i++) {
+            for (int j = 0; j < totalNodos; j++) {
+                if (i == j) {
+                    distancias[i][j] = 0.0;
+                } else {
+                    double dx = coordX[i] - coordX[j];
+                    double dy = coordY[i] - coordY[j];
+                    // La distancia euclídea: sqrt(dx^2 + dy^2)
+                    distancias[i][j] = Math.sqrt(dx * dx + dy * dy);
+                }
+            }
+        }
     }
 
-    
-    // ========================================================================
-    // Generation of initial state
-    // ========================================================================
-    
-    // Idea general, depende nombres y variables del Estado
-    
-    private int[][][] trivialInit() {
-        int[][][] matriz = new int[ncentros][maxhelicopteros][ngrupos];
+    // ==========================================
+    // 3. DATOS DINÁMICOS (El estado de la búsqueda)
+    // ==========================================
+    // rutas[h] contiene la secuencia de grupos rescatados por el helicóptero h.
+    // Usaremos -1 como separador para indicar que el helicóptero vuelve al centro.
+    // Ejemplo: rutas[0] = {5, 12, -1, 8, -1} (El helicóptero 0 rescata a 5 y 12, vuelve, luego rescata a 8 y vuelve).
+    public int[][] rutas;
 
-        for (int i = 0; i < ngrupos; i++) {
-            int c = ngrupos % ncentros; // asignamos grupo a centro
-            int h = ngrupos % nhelicopteros; // asignamos grupo a helicoptero
+    // ==========================================
+    // 4. CONSTRUCTORES
+    // ==========================================
+    
+    // Constructor para generar el Estado Inicial
+    public Board(int tipoInicializacion) {
+        rutas = new int[numHelicopterosTotal][];
+        
+        if (tipoInicializacion == 1) {
+            generarSolucionInicialGreedy();
+        } else {
+            // Si el tipo es distinto de 1, podrías llamar a una solución puramente aleatoria.
+            // Por ahora, para que no falle si le pasas otro número, llamamos a la misma.
+            generarSolucionInicialGreedy(); 
+        }
+    }
+
+    // Constructor de copia para los sucesores (Rápido y profundo)
+    public Board(Board antiguo) {
+        rutas = new int[numHelicopterosTotal][];
+        for (int i = 0; i < numHelicopterosTotal; i++) {
+            // Clonamos cada array interno para que las modificaciones en un sucesor no afecten al padre
+            if (antiguo.rutas[i] != null) {
+                rutas[i] = antiguo.rutas[i].clone();
+            }
+        }
+    }
+
+    // ==========================================
+    // 5. LÓGICA DE SOLUCIONES INICIALES
+    // ==========================================
+    private void generarSolucionInicialGreedy() {
+        // Estructura temporal para ir construyendo las rutas.
+        // ArrayList facilita añadir elementos dinámicamente antes de pasarlo al array final primitivo.
+        ArrayList<ArrayList<Integer>> rutasTemp = new ArrayList<>();
+        for (int i = 0; i < numHelicopterosTotal; i++) {
+            rutasTemp.add(new ArrayList<Integer>());
+        }
+
+        // Variables de control de estado actual por cada helicóptero
+        int[] personasActuales = new int[numHelicopterosTotal];
+        int[] gruposEnEsteViaje = new int[numHelicopterosTotal];
+
+        // Recorremos todos los grupos a rescatar
+        for (int grupoId = 0; grupoId < numGrupos; grupoId++) {
+            int personas = personasPorGrupo[grupoId];
             
-            matriz[c][h].put(i); // añadimos grupo i a centro c, helicóptero h
+            // 1. Encontrar el centro más cercano a este grupo
+            int centroMasCercano = -1;
+            double distanciaMinima = Double.MAX_VALUE;
+            
+            for (int c = 0; c < numCentros; c++) {
+                double dist = distancias[c][numCentros + grupoId];
+                if (dist < distanciaMinima) {
+                    distanciaMinima = dist;
+                    centroMasCercano = c;
+                }
+            }
+
+            // 2. Escoger un helicóptero de ese centro.
+            // Para simplificar la estrategia Greedy básica, se lo asignamos al primer helicóptero de ese centro.
+            // (El helicóptero 0 del Centro 1 sería el ID global: 1 * numHelicopterosPorCentro + 0)
+            int heliId = centroMasCercano * numHelicopterosPorCentro; 
+            
+            // 3. Comprobar restricciones de capacidad (Max 15 pers) y max salidas (Max 3 grupos)
+            boolean cabeEnViajeActual = (personasActuales[heliId] + personas <= 15) && (gruposEnEsteViaje[heliId] < 3);
+
+            if (!cabeEnViajeActual) {
+                // Si no cabe o ya ha recogido 3 grupos, el helicóptero debe volver al centro
+                if (gruposEnEsteViaje[heliId] > 0) { // Solo si llevaba a alguien
+                    rutasTemp.get(heliId).add(-1); // -1 indica vuelta al centro
+                }
+                // Reseteamos contadores para el nuevo viaje
+                personasActuales[heliId] = 0;
+                gruposEnEsteViaje[heliId] = 0;
+            }
+
+            // 4. Asignar el grupo al helicóptero
+            rutasTemp.get(heliId).add(grupoId);
+            personasActuales[heliId] += personas;
+            gruposEnEsteViaje[heliId]++;
         }
 
-        return matriz;
-    }
-
-    private int[][][] randomInit() {
-        int[][][] matriz = new int[ncentros][maxhelicopteros][ngrupos];
-
-        ArrayList<Integer> groupsToAssign = new ArrayList<Integer>();
-        Random myRandom = new Random();
-
-        for (int i = 0; i < ngrupos; i++) {
-            groupsToAssign.add(i);
-        }
-
-        for (int i = 0; i < ncentros; i++) {
-            for (int j = 0; i < numHelicopterosCentro[i]; j++) {
-                int p = myRandom.nextInt(groupsToAssign.size());
-                matriz[i][j].put(groupsToAssign.get(p)); // añadimos viaje grupo i
-                groupsToAssign.remove(p);
+        // Cerramos los viajes (añadimos -1 al final si la ruta no está vacía y no acaba ya en -1)
+        for (int i = 0; i < numHelicopterosTotal; i++) {
+            ArrayList<Integer> rutaHeli = rutasTemp.get(i);
+            if (!rutaHeli.isEmpty() && rutaHeli.get(rutaHeli.size() - 1) != -1) {
+                rutaHeli.add(-1);
             }
         }
 
-        // ¿¿TODO: Juntar viajes de un mismo helicóptero hasta que ocupen 15??
-
-        return matriz;
-    }
-
-    private int[][][] greedyInit() {
-        int[][][] matriz = new int[ncentros][maxhelicopteros][ngrupos];
-
-        int[] helicopteroParaGrupo = new int[ngrupos];
-
-        // IDEA:
-        // - para cada grupo, asignar el helicóptero más próximo
-
-        for (int i = 0; i < ngrupos; i++) {
-            helicopteroParaGrupo = nearestHelicopter(i);
+        // 5. Convertir la estructura temporal ArrayList a nuestro array int[][] final y eficiente
+        for (int i = 0; i < numHelicopterosTotal; i++) {
+            ArrayList<Integer> rutaHeli = rutasTemp.get(i);
+            rutas[i] = new int[rutaHeli.size()];
+            for (int j = 0; j < rutaHeli.size(); j++) {
+                rutas[i][j] = rutaHeli.get(j);
+            }
         }
-
-        // - cuando todos los grupos tienen el helicóptero asignado, ir llenando viajes
-
-        // por cada helicóptero, de entre los grupos que tiene asignados, crear
-        // llenar viaje hasta personas >15 o grupos >3.
     }
 
-    // private int[] greedyPath(int nc) {
-    //     int[] ipath = new int[nc];
-    //     ArrayList<Integer> c = new ArrayList<Integer>();
-    //
-    //     for (int i = 0; i < nc; i++) {
-    //         c.add(i);
-    //     }
-    //
-    //     ipath[0] = c.get(0);
-    //     c.remove(ipath[0]);
-    //     for (int i = 1; i < nc - 1; i++) {
-    //         Integer ci = nearestCity(ipath[i - 1], c);
-    //         ipath[i] = ci;
-    //         c.remove(ci);
-    //
-    //     }
-    //     ipath[nc - 1] = c.get(0);
-    //     return ipath;
-    // }
-    //
-    // private Integer nearestCity(int c, ArrayList<Integer> lc) {
-    //     int n = 0;
-    //
-    //     int min = 1000;
-    //     for (int i = 0; i < lc.size(); i++) {
-    //         if (lc.get(i) != c) {
-    //
-    //             if (min > dist[c][lc.get(i)]) {
-    //                 min = dist[c][lc.get(i)];
-    //                 n = lc.get(i);
-    //             }
-    //         }
-    //     }
-    //
-    //     return (n);
-    //
-    // }
+    // ==========================================
+    // 6. LIMPIEZA Y REESTRUCTURACIÓN DE RUTAS
+    // ==========================================
+    public void limpiarYReestructurar() {
+        for (int h = 0; h < numHelicopterosTotal; h++) {
+            if (rutas[h] == null || rutas[h].length == 0) continue;
+
+            ArrayList<ArrayList<Integer>> viajes = new ArrayList<>();
+            ArrayList<Integer> viajeActual = new ArrayList<>();
+
+            // 1. Extraemos los grupos limpios, agrupados por viaje
+            for (int i = 0; i < rutas[h].length; i++) {
+                int grupoId = rutas[h][i];
+                if (grupoId == -1) {
+                    if (!viajeActual.isEmpty()) {
+                        viajes.add(viajeActual);
+                        viajeActual = new ArrayList<>(); // Preparamos el siguiente viaje
+                    }
+                } else {
+                    viajeActual.add(grupoId);
+                }
+            }
+            // Por si el array terminaba con un grupo y le faltaba el -1
+            if (!viajeActual.isEmpty()) {
+                viajes.add(viajeActual);
+            }
+
+            // 2. Reconstruimos el array de primitivos perfecto
+            int totalElementos = 0;
+            for (ArrayList<Integer> v : viajes) {
+                totalElementos += v.size() + 1; // +1 por el delimitador '-1'
+            }
+
+            int[] rutaLimpia = new int[totalElementos];
+            int idx = 0;
+            for (ArrayList<Integer> v : viajes) {
+                for (Integer g : v) {
+                    rutaLimpia[idx++] = g;
+                }
+                rutaLimpia[idx++] = -1; // Cierre de viaje garantizado
+            }
+            rutas[h] = rutaLimpia;
+        }
+    }
+
+
+    // ==========================================
+    // 7. VALIDADOR DE ESTADO
+    // ==========================================
+    public boolean esValido() {
+        for (int h = 0; h < numHelicopterosTotal; h++) {
+            if (rutas[h] == null) continue;
+            
+            int personasViaje = 0;
+            int gruposViaje = 0;
+            
+            for (int i = 0; i < rutas[h].length; i++) {
+                int grupoId = rutas[h][i];
+                
+                if (grupoId == -1) {
+                    // Fin del viaje, reseteamos contadores
+                    personasViaje = 0;
+                    gruposViaje = 0;
+                } else {
+                    // Añadimos carga al viaje
+                    personasViaje += personasPorGrupo[grupoId];
+                    gruposViaje++;
+                    
+                    // Si nos pasamos de las reglas de la práctica, este estado es inválido
+                    if (personasViaje > 15 || gruposViaje > 3) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+
 
 }

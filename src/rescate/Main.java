@@ -4,52 +4,63 @@ import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
 import aima.search.informed.HillClimbingSearch;
-import aima.search.informed.SimulatedAnnealingSearch;
+// import aima.search.informed.SimulatedAnnealingSearch;
 
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        Board board = new Board(...);
-        DesastresHillClimbingSearch(board);
-        DesastresSimulatedAnnealingSearch(board);
+        System.out.println("=== INICIANDO BÚSQUEDA LOCAL ===");
+        
+        // 1. INICIALIZAR EL ESCENARIO
+        int numGrupos = 100;
+        int numCentros = 5;
+        int numHelicopteros = 1;
+        int semilla = 1234;
+        Board.inicializarDatosEstaticos(numGrupos, numCentros, numHelicopteros, semilla);
+        
+        // 2. CREAR ESTADO INICIAL (1 = Greedy)
+        Board board = new Board(1);
+        
+        // 3. PROBAR LA HEURÍSTICA DEL ESTADO INICIAL
+        HeuristicFunction1 hf = new HeuristicFunction1();
+        double costeInicial = hf.getHeuristicValue(board);
+        System.out.println("Coste de la solución inicial Greedy: " + costeInicial + " minutos.");
+
+        // 4. EJECUTAR ALGORITMO
+        DesastresHillClimbingSearch(board, costeInicial);
     }
 
-    private static void DesastresHillClimbingSearch(Board board) {
-        System.out.println("\nDesastres Hill Climbing -->");
+    private static void DesastresHillClimbingSearch(Board board, double costeInicial) {
+        System.out.println("\n--- Ejecutando Hill Climbing ---");
         try {
-            Problem problem =  new Problem(board, new SuccessorFunction(), new GoalTest(), new HeuristicFunction());
-            Search search =  new HillClimbingSearch();
+            // Reiniciamos el rastreador por si hacemos varios experimentos
+            HeuristicFunction1.mejorCoste = costeInicial;
+            
+            Problem problem = new Problem(board, new SuccessorFunctionHC(), new GoalTestFalse(), new HeuristicFunction1());
+            Search search = new HillClimbingSearch();
             SearchAgent agent = new SearchAgent(problem, search);
             
             System.out.println();
-            printActions(agent.getActions());
-            printInstrumentation(agent.getInstrumentation());
+            for (Object action : agent.getActions()) {
+                System.out.println(action.toString());
+            }
+            System.out.println(agent.getInstrumentation().toString());
+            
+            // =======================================================
+            // --- NUEVO CÓDIGO PARA IMPRIMIR EL COSTE FINAL ---
+            // =======================================================
+
+            System.out.println("--------------------------------------------------");
+            System.out.println("¡Búsqueda Finalizada!");
+            System.out.println("Coste Inicial: " + costeInicial + " minutos.");
+            System.out.println("Coste Final:   " + HeuristicFunction1.mejorCoste + " minutos.");
+            double mejora = costeInicial - HeuristicFunction1.mejorCoste;
+            System.out.println("Mejora total:  " + mejora + " minutos.");
+            System.out.println("--------------------------------------------------");
+            // =======================================================
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
-    private static void DesastresSimulatedAnnealingSearch(Board board) {
-        System.out.println("\nDesastres Simulated Annealing  -->");
-        try {
-            Problem problem =  new Problem(board, new SuccessorFunction(), new GoalTest(), new HeuristicFunction());
-            SimulatedAnnealingSearch search =  new SimulatedAnnealingSearch(...); // ? (2000,100,5,0.001);
-            // search.traceOn();
-            SearchAgent agent = new SearchAgent(problem, search);
-            
-            System.out.println();
-            printActions(agent.getActions());
-            printInstrumentation(agent.getInstrumentation());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-//     private void TSPActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_TSPActionPerformed
-// // TODO add your handling code here:
-//         ProbTSPJFrame el = new ProbTSPJFrame();
-//
-//         el.setVisible(true);
-//     }//GEN-LAST:event_TSPActionPerformed
-
 }
