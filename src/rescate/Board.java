@@ -157,6 +157,7 @@ public class Board {
         // TODO: decidir qué semilla usar
 /*
 Objetivo	                                | Semilla recomendada
+-------------------------------------------------------------------------------
 Reproducibilidad (experimentos, informes)	| Semilla fija o pasada por parámetro
 Aleatoriedad real	                        | System.currentTimeMillis()
 Aleatoriedad fuerte	                      | SecureRandom
