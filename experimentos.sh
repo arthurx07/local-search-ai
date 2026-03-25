@@ -133,13 +133,13 @@ exp3() {
             # STEPS=$(( STEPS - (STEPS % 1000) ))
             for K in "${K_LIST[@]}"; do
                 for LAMBDA in "${LAMBDA_LIST[@]}"; do
-                    SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INI" "$HEURISTICA" "$ALGORITMO" "$OPERADORES" --steps "$STEPS" --k "$K" --lambda "$LAMBDA")
+                    SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INICIAL" "$HEURISTICA" "$ALGORITMO" "$OPERADORES" --steps "$STEPS" --k "$K" --lambda "$LAMBDA")
 
                     COSTE=$(echo "$SALIDA" | grep "COSTE=" | cut -d= -f2)
                     TIEMPO=$(echo "$SALIDA" | grep "TIEMPO_MS=" | cut -d= -f2)
 
                     echo "3,$RUN,$SEMILLA,$STEPS,$K,$LAMBDA,$TIEMPO,$COSTE" >> "$CSV"
-                    echo "RUN: $RUN, STEPS: $INI, K: $K, LAMBDA: $LAMBDA"
+                    echo "RUN: $RUN, STEPS: $STEPS, K: $K, LAMBDA: $LAMBDA"
                 done
             done
         done

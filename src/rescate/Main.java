@@ -59,9 +59,9 @@ public class Main {
         if (algoritmo.equals("hc")) {
             DesastresHillClimbingSearch(board, costeInicial);
         } else if (algoritmo.equals("sa")) {
-            int steps  = Integer.parseInt(params.getOrDefault("steps", "2000"));
-            int k      = Integer.parseInt(params.getOrDefault("k", "5"));
-            int lambda = Integer.parseInt(params.getOrDefault("lambda", "0.001"));
+            int steps     = Integer.parseInt(params.getOrDefault("steps", "2000"));
+            int k         = Integer.parseInt(params.getOrDefault("k", "5"));
+            double lambda = Double.parseDouble(params.getOrDefault("lambda", "0.001"));
             // ¿stiter?
             // SimulatedAnnealingSearch search =  new SimulatedAnnealingSearch(2000,100,5,0.001);
             // SimulatedAnnealingSearch(int steps, int stiter, int k, double lamb)
