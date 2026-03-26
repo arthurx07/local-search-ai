@@ -311,6 +311,17 @@ Aleatoriedad dependiente del problema	    | Objects.hash(...)
                 viajes.add(viajeActual);
             }
 
+            // 1.5. Llamada al optimizador local
+            int centroId = h / numHelicopterosPorCentro;
+
+            for (ArrayList<Integer> v : viajes) {
+                //if (v.size() == 3) { 
+                //En principio el compilador de java optimiza la llamada "Inlining" y con el if de dentro es suficiente
+                optimizarViajeDeTres(v, centroId);
+                //}
+            }
+            // -------------------------------------------------------------
+
             // 2. Reconstruimos el array de primitivos perfecto
             int totalElementos = 0;
             for (ArrayList<Integer> v : viajes) {
@@ -367,4 +378,39 @@ Aleatoriedad dependiente del problema	    | Objects.hash(...)
     }
 
 
+    // =============================================================
+    // Función auxiliar: Optimizador Local (Sub-TSP de 3 nodos)
+    // =============================================================
+    private void optimizarViajeDeTres(ArrayList<Integer> viaje, int centroId) {
+        // Medida de seguridad: si no tiene exactamente 3 grupos, salimos
+        if (viaje.size() != 3) return;
+
+        int g1 = viaje.get(0);
+        int g2 = viaje.get(1);
+        int g3 = viaje.get(2);
+
+        // Convertimos a índices de la matriz estática
+        int nC = centroId;
+        int nG1 = numCentros + g1;
+        int nG2 = numCentros + g2;
+        int nG3 = numCentros + g3;
+
+        // Evaluamos las 3 únicas permutaciones posibles
+        double cost1 = tiempoViaje[nC][nG1] + tiempoViaje[nG1][nG2] + tiempoViaje[nG2][nG3] + tiempoViaje[nG3][nC];
+        double cost2 = tiempoViaje[nC][nG1] + tiempoViaje[nG1][nG3] + tiempoViaje[nG3][nG2] + tiempoViaje[nG2][nC];
+        double cost3 = tiempoViaje[nC][nG2] + tiempoViaje[nG2][nG1] + tiempoViaje[nG1][nG3] + tiempoViaje[nG3][nC];
+
+        // Aplicamos la mejor ordenación modificando el ArrayList por referencia
+        if (cost1 <= cost2 && cost1 <= cost3) {
+            // Ya está en el orden óptimo (G1, G2, G3), no hacemos nada
+        } else if (cost2 <= cost1 && cost2 <= cost3) {
+            // Mejor orden: G1, G3, G2
+            viaje.set(1, g3);
+            viaje.set(2, g2);
+        } else {
+            // Mejor orden: G2, G1, G3
+            viaje.set(0, g2);
+            viaje.set(1, g1);
+        }
+    }
 }
