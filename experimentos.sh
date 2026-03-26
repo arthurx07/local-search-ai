@@ -52,6 +52,7 @@ exp1() {
 
     for RUN in $(seq 1 "$REPS"); do
         SEMILLA=$RANDOM # TODO: PENSAR SI PONER LA SEMILLA QUE CAMBIE EN CADA EJECUCIÓN DEL EXPERIMENTO ES CORRECTO
+
         for OPS in "${OPERADORES_LIST[@]}"; do
             SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INICIAL" "$HEURISTICA" "$ALGORITMO" "$OPS")
 
@@ -59,7 +60,7 @@ exp1() {
             TIEMPO=$(echo "$SALIDA" | grep "TIEMPO_MS=" | cut -d= -f2)
 
             echo "1,$RUN,$SEMILLA,$OPS,$TIEMPO,$COSTE" >> "$CSV"
-            echo "RUN: $RUN, OPS: $OPS"
+            echo "RUN $RUN | OPS $OPS | TIEMPO $TIEMPO | COSTE $COSTE"
         done
     done
 }
@@ -80,10 +81,11 @@ exp2() {
     INICIALES=("greedy" "aleatorio")
     HEURISTICA=1
     ALGORITMO="hc"
-    OPERADORES="swap+move"
+    OPERADORES="swap+move" # TODO: Quizás
 
     for RUN in $(seq 1 "$REPS"); do
         SEMILLA=$RANDOM # TODO: PENSAR SI PONER LA SEMILLA QUE CAMBIE EN CADA EJECUCIÓN DEL EXPERIMENTO ES CORRECTO
+
         for INI in "${INICIALES[@]}"; do
             SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INI" "$HEURISTICA" "$ALGORITMO" "$OPERADORES")
 
@@ -91,7 +93,7 @@ exp2() {
             TIEMPO=$(echo "$SALIDA" | grep "TIEMPO_MS=" | cut -d= -f2)
 
             echo "2,$RUN,$SEMILLA,$INI,$TIEMPO,$COSTE" >> "$CSV"
-            echo "RUN: $RUN, INI: $INI"
+            echo "RUN $RUN | INI $INI | TIEMPO $TIEMPO | COSTE $COSTE"
         done
     done
 }
@@ -104,7 +106,7 @@ exp3() {
     mkdir -p "$RESDIR"
     CSV="$RESDIR/runs.csv"
 
-    echo "exp,run,semilla,T0,K,L,tiempo,coste" > "$CSV"
+    echo "exp,run,semilla,steps,stiter,k,lambda,tiempo,coste" > "$CSV"
 
     GRUPOS=100
     CENTROS=5
@@ -112,9 +114,10 @@ exp3() {
     INICIAL="aleatorio" # TODO: QUIZÁS ES MEJOR EL GREEDY. NO LO SABEMOS AÚN
     HEURISTICA=1
     ALGORITMO="sa"
-    OPERADORES="swap+move"
+    OPERADORES="swap+move" # TODO: Quizás
 
     STEPS_LIST=(1000 5000 10000) # Número de iteraciones totales TODO: DETERMINARLA
+    STITER=100 # TODO: Determinar
     K_LIST=(1 5 10) # Escala de temperatura TODO: DETERMINARLOS
       # Afecta a qué tan alta es la temperatura al principio y cómo de “suave” es el enfriamiento.
     LAMBDA_LIST=(0.01 0.1 0.5 1.0) # Factor multiplicativo de enfriamiento TODO: DETERMINARLOS
@@ -133,39 +136,171 @@ exp3() {
             # STEPS=$(( STEPS - (STEPS % 1000) ))
             for K in "${K_LIST[@]}"; do
                 for LAMBDA in "${LAMBDA_LIST[@]}"; do
-                    SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INICIAL" "$HEURISTICA" "$ALGORITMO" "$OPERADORES" --steps "$STEPS" --k "$K" --lambda "$LAMBDA")
+                    SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INICIAL" "$HEURISTICA" "$ALGORITMO" "$OPERADORES" \
+                                          --steps "$STEPS" --stiter "$STITER" --k "$K" --lambda "$LAMBDA")
 
                     COSTE=$(echo "$SALIDA" | grep "COSTE=" | cut -d= -f2)
                     TIEMPO=$(echo "$SALIDA" | grep "TIEMPO_MS=" | cut -d= -f2)
 
-                    echo "3,$RUN,$SEMILLA,$STEPS,$K,$LAMBDA,$TIEMPO,$COSTE" >> "$CSV"
-                    echo "RUN: $RUN, STEPS: $STEPS, K: $K, LAMBDA: $LAMBDA"
+                    echo "3,$RUN,$SEMILLA,$STEPS,$STITER,$K,$LAMBDA,$TIEMPO,$COSTE" >> "$CSV"
+                    echo "RUN $RUN | STEPS $STEPS | STITER $STITER | K $K | LAMBDA $LAMBDA | TIEMPO $TIEMPO | COSTE $COSTE"
                 done
             done
         done
     done
 }
 
-# resultados/
-#   exp1/
-#     config.txt
-#     runs.csv
-#   exp2/
-#     config.txt
-#     runs.csv
-#   exp3/
-#     config.txt
-#     runs.csv
-#   exp4/
-#     hc.csv
-#     sa.csv
-#   exp5/
-#     grupos.csv
-#     centros.csv
-#   exp6/
-#     runs.csv
-#   exp7/
-#     pesos.csv
+# ============================
+# EXPERIMENTO 4
+# ============================
+exp4() {
+    RESDIR="$BASE/exp4"
+    mkdir -p "$RESDIR"
+    CSV="$RESDIR/runs.csv"
+
+    echo "exp,run,semilla,algoritmo,grupos,centros,tiempo,coste" > "$CSV"
+
+    GRUPOS_INI=100
+    CENTROS_INI=5
+    HELICOPTEROS=1
+    INICIAL="aleatorio" # TODO: QUIZÁS ES MEJOR EL GREEDY. NO LO SABEMOS AÚN
+    HEURISTICA=1
+    ALGORITMOS=("hc" "sa")
+    OPERADORES="swap+move" # TODO: Quizás modificar
+
+    STEPS=2000 # TODO: aún por ver en experimento 3
+    STITER=100 # TODO: aún por ver en experimento 3
+    K=5 # TODO: aún por ver en experimento 3
+    LAMBDA=0.01 # TODO: aún por ver en experimento 3
+
+    # Número de escalados del problema (10 -> 1000 grupos, 50 centros)
+    ESCALADOS=10 # TODO: Pensar cuántas iteraciones de esto hacer
+
+    for RUN in $(seq 1 "$REPS"); do
+        SEMILLA=$RANDOM # TODO: PENSAR SI PONER LA SEMILLA QUE CAMBIE EN CADA EJECUCIÓN DEL EXPERIMENTO ES CORRECTO
+
+        GRUPOS=$GRUPOS_INI
+        CENTROS=$CENTROS_INI
+
+        for _ in $(seq 1 "$ESCALADOS"); do
+            # SEMILLA=$RANDOM # TODO: Pensar si cambiar la semilla cuando se augmenta grupos y centros
+            for ALG in "${ALGORITMOS[@]}"; do
+                SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INICIAL" "$HEURISTICA" "$ALG" "$OPERADORES" \
+                                      --steps "$STEPS" --stiter "$STITER" --k "$K" --lambda "$LAMBDA")
+
+                COSTE=$(echo "$SALIDA" | grep "COSTE=" | cut -d= -f2)
+                TIEMPO=$(echo "$SALIDA" | grep "TIEMPO_MS=" | cut -d= -f2)
+
+                echo "4,$RUN,$SEMILLA,$ALG,$GRUPOS,$CENTROS,$TIEMPO,$COSTE" >> "$CSV"
+                echo "RUN $RUN | GRUPOS $GRUPOS | CENTROS $CENTROS | TIEMPO $TIEMPO | COSTE $COSTE"
+            done
+
+            GRUPOS=$(( GRUPOS + GRUPOS_INI ))
+            CENTROS=$(( CENTROS + CENTROS_INI ))
+        done
+    done
+}
+
+
+
+# ============================
+# EXPERIMENTO 5
+# ============================
+exp5() {
+    RESDIR="$BASE/exp5"
+    mkdir -p "$RESDIR"
+    CSV="$RESDIR/runs.csv"
+
+    echo "exp,run,semilla,grupos,centros,tiempo,coste" > "$CSV"
+
+    GRUPOS_INI=100
+    GRUPOS_AUGM=50
+    CENTROS_INI=5
+    CENTROS_AUGM=5
+    HELICOPTEROS=1
+    INICIAL="aleatorio" # TODO: QUIZÁS ES MEJOR EL GREEDY. NO LO SABEMOS AÚN
+    HEURISTICA=1
+    ALGORITMO="hc"
+    OPERADORES="swap+move" # TODO: Quizás modificar
+
+    ITERACIONES=10 # TODO: Pensar cuántas iteraciones de esto hacer
+
+    for RUN in $(seq 1 "$REPS"); do
+        SEMILLA=$RANDOM # TODO: PENSAR SI PONER LA SEMILLA QUE CAMBIE EN CADA EJECUCIÓN DEL EXPERIMENTO ES CORRECTO
+
+        GRUPOS=$GRUPOS_INI
+        CENTROS=$CENTROS_INI
+
+        echo "INCREMENTANDO GRUPOS DE 50 EN 50"
+        for _ in $(seq 1 "$ITERACIONES"); do
+            SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INICIAL" "$HEURISTICA" "$ALGORITMO" "$OPERADORES")
+
+            COSTE=$(echo "$SALIDA" | grep "COSTE=" | cut -d= -f2)
+            TIEMPO=$(echo "$SALIDA" | grep "TIEMPO_MS=" | cut -d= -f2)
+
+            echo "5,$RUN,$SEMILLA,$GRUPOS,$CENTROS,$TIEMPO,$COSTE" >> "$CSV"
+            echo "RUN $RUN | GRUPOS $GRUPOS | CENTROS $CENTROS | TIEMPO $TIEMPO | COSTE $COSTE"
+
+            GRUPOS=$(( GRUPOS + GRUPOS_AUGM ))
+        done
+
+        GRUPOS=$GRUPOS_INI
+
+        echo "INCREMENTANDO CENTROS DE 5 EN 5"
+        for _ in $(seq 1 "$ITERACIONES"); do
+            SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INICIAL" "$HEURISTICA" "$ALGORITMO" "$OPERADORES")
+
+            COSTE=$(echo "$SALIDA" | grep "COSTE=" | cut -d= -f2)
+            TIEMPO=$(echo "$SALIDA" | grep "TIEMPO_MS=" | cut -d= -f2)
+
+            echo "5,$RUN,$SEMILLA,$GRUPOS,$CENTROS,$TIEMPO,$COSTE" >> "$CSV"
+            echo "RUN $RUN | GRUPOS $GRUPOS | CENTROS $CENTROS | TIEMPO $TIEMPO | COSTE $COSTE"
+
+            CENTROS=$(( CENTROS + CENTROS_AUGM ))
+        done
+    done
+}
+
+# ============================
+# EXPERIMENTO 6
+# ============================
+exp6() {
+    RESDIR="$BASE/exp6"
+    mkdir -p "$RESDIR"
+    CSV="$RESDIR/runs.csv"
+
+    echo "exp,run,semilla,helicopteros,tiempo,coste" > "$CSV"
+
+    GRUPOS=100
+    CENTROS=5
+    INICIAL="aleatorio" # TODO: QUIZÁS ES MEJOR EL GREEDY. NO LO SABEMOS AÚN
+    HEURISTICA=1
+    ALGORITMO="hc"
+    OPERADORES="swap+move" # TODO: Quizás modificar
+
+    ITERACIONES=10 # TODO: Pensar cuántas iteraciones de esto hacer
+
+    for RUN in $(seq 1 "$REPS"); do
+        SEMILLA=$RANDOM # TODO: PENSAR SI PONER LA SEMILLA QUE CAMBIE EN CADA EJECUCIÓN DEL EXPERIMENTO ES CORRECTO
+
+        for HELICOPTEROS in $(seq 1 "$ITERACIONES"); do
+            SALIDA=$(run_program "$GRUPOS" "$CENTROS" "$HELICOPTEROS" "$SEMILLA" "$INICIAL" "$HEURISTICA" "$ALGORITMO" "$OPERADORES")
+
+            COSTE=$(echo "$SALIDA" | grep "COSTE=" | cut -d= -f2)
+            TIEMPO=$(echo "$SALIDA" | grep "TIEMPO_MS=" | cut -d= -f2)
+
+            echo "6,$RUN,$SEMILLA,$HELICOPTEROS,$TIEMPO,$COSTE" >> "$CSV"
+            echo "RUN $RUN | HELICOPTEROS $HELICOPTEROS | TIEMPO $TIEMPO | COSTE $COSTE"
+        done
+    done
+}
+
+# ============================
+# EXPERIMENTO 7
+# ============================
+# exp7() {
+#   TODO
+# }
 
 # ============================
 # Dispatcher
