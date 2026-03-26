@@ -41,6 +41,10 @@ public class Main {
         int numCentros      = Integer.parseInt(params.getOrDefault("centros", "5"));
         int numHelicopteros = Integer.parseInt(params.getOrDefault("helicopteros", "1"));
         int semilla         = Integer.parseInt(params.getOrDefault("semilla", "1234"));
+        
+        // APLICAR CONFIGURACIÓN DEL OPTIMIZADOR
+        Board.usarOptimizadorLocal = Boolean.parseBoolean(params.getOrDefault("opt3", "true"));
+        
         // semilla se usará para: distribución de grupos y centros; generación aleatoria del estado inicial
         Board.inicializarDatosEstaticos(numGrupos, numCentros, numHelicopteros, semilla);
         
@@ -216,6 +220,8 @@ public class Main {
                     case 'e': map.put("stiter", args[i + 1]); break;     // -e (Evaluations/iterations)
                     case 'k': map.put("k", args[i + 1]); break;          // -k
                     case 'd': map.put("lambda", args[i + 1]); break;     // -d (Decay/Lambda)
+
+                    case 'z': map.put("opt3", args[i + 1]); break; // NUEVA LETRA 'z' para OPTIMIZADOR
                     
                     default:
                         System.err.println("Opción desconocida: -" + flag);
@@ -242,6 +248,7 @@ public class Main {
         System.out.println("  -u --heuristica <1|2>                 Heurística a usar (default 1)");
         System.out.println("  -a --algoritmo <hc|sa>                Algoritmo de búsqueda (default hc)");
         System.out.println("  -o --operadores <swap|move|swap+move> Operadores (default swap+move)");
+        System.out.println("  -z --opt3 <true|false>                Optimizador local de 3 grupos (default true)");
         System.out.println();
         System.out.println("Opciones específicas para Simulated Annealing:");
         System.out.println("  -t --steps <n>                        Número de iteraciones totales (default 2000)");

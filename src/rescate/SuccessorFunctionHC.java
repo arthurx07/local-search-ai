@@ -109,11 +109,11 @@ public class SuccessorFunctionHC implements SuccessorFunction {
                             nuevaRutaH2[p2] = piezaExtraida; 
                             System.arraycopy(sucesor.rutas[h2], p2, nuevaRutaH2, p2 + 1, sucesor.rutas[h2].length - p2);
                             sucesor.rutas[h2] = nuevaRutaH2;
-                            
+
                         } else {
                             int[] nuevaRuta = new int[sucesor.rutas[h1].length];
                             int idx = 0;
-                            
+
                             for (int i = 0; i < sucesor.rutas[h1].length; i++) {
                                 if (i != p1) nuevaRuta[idx++] = sucesor.rutas[h1][i];
                             }

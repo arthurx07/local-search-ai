@@ -15,6 +15,9 @@ public class Board {
     public static int numHelicopterosPorCentro;
     public static int numHelicopterosTotal;
     
+    // NUEVO: Flag para activar/desactivar el optimizador desde consola
+    public static boolean usarOptimizadorLocal = true;
+
     // Arrays para las características de los grupos
     public static int[] personasPorGrupo;
     public static int[] prioridadGrupo;
@@ -302,14 +305,15 @@ public class Board {
                 viajes.add(viajeActual);
             }
 
-            // 1.5. Llamada al optimizador local
-            int centroId = h / numHelicopterosPorCentro;
-
-            for (ArrayList<Integer> v : viajes) {
+            //Solo llamamos al optimizador si está activado
+            if (usarOptimizadorLocal) {
+                int centroId = h / numHelicopterosPorCentro;
+                for (ArrayList<Integer> v : viajes) {
                 //if (v.size() == 3) { 
                 //En principio el compilador de java optimiza la llamada "Inlining" y con el if de dentro es suficiente
                 optimizarViajeDeTres(v, centroId);
                 //}
+                }
             }
             // -------------------------------------------------------------
 
