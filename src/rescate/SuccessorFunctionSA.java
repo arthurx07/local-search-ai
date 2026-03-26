@@ -52,25 +52,29 @@ public class SuccessorFunctionSA implements SuccessorFunction {
                 
                 if (h1 == h2 && (p1 == p2 || p1 == p2 - 1)) continue; // Evitar mover al mismo sitio
 
-                ArrayList<Integer> rutaH1 = new ArrayList<>();
-                for (int g : sucesor.rutas[h1]) rutaH1.add(g);
-                
-                ArrayList<Integer> rutaH2 = (h1 == h2) ? rutaH1 : new ArrayList<>();
+                int piezaExtraida = sucesor.rutas[h1][p1];
+
                 if (h1 != h2) {
-                    for (int g : sucesor.rutas[h2]) rutaH2.add(g);
-                }
-                
-                int pieza = rutaH1.remove(p1);
-                int indexInsert = p2;
-                if (h1 == h2 && p1 < p2) indexInsert--;
-                rutaH2.add(indexInsert, pieza);
-                
-                sucesor.rutas[h1] = new int[rutaH1.size()];
-                for (int i=0; i<rutaH1.size(); i++) sucesor.rutas[h1][i] = rutaH1.get(i);
-                
-                if (h1 != h2) {
-                    sucesor.rutas[h2] = new int[rutaH2.size()];
-                    for (int i=0; i<rutaH2.size(); i++) sucesor.rutas[h2][i] = rutaH2.get(i);
+                    int[] nuevaRutaH1 = new int[sucesor.rutas[h1].length - 1];
+                    System.arraycopy(sucesor.rutas[h1], 0, nuevaRutaH1, 0, p1);
+                    System.arraycopy(sucesor.rutas[h1], p1 + 1, nuevaRutaH1, p1, sucesor.rutas[h1].length - p1 - 1);
+                    sucesor.rutas[h1] = nuevaRutaH1;
+
+                    int[] nuevaRutaH2 = new int[sucesor.rutas[h2].length + 1];
+                    System.arraycopy(sucesor.rutas[h2], 0, nuevaRutaH2, 0, p2);
+                    nuevaRutaH2[p2] = piezaExtraida;
+                    System.arraycopy(sucesor.rutas[h2], p2, nuevaRutaH2, p2 + 1, sucesor.rutas[h2].length - p2);
+                    sucesor.rutas[h2] = nuevaRutaH2;
+                } else {
+                    int[] nuevaRuta = new int[sucesor.rutas[h1].length];
+                    int idx = 0;
+                    for (int i = 0; i < sucesor.rutas[h1].length; i++) {
+                        if (i != p1) nuevaRuta[idx++] = sucesor.rutas[h1][i];
+                    }
+                    int insertIdx = (p1 < p2) ? p2 - 1 : p2;
+                    System.arraycopy(nuevaRuta, insertIdx, nuevaRuta, insertIdx + 1, nuevaRuta.length - 1 - insertIdx);
+                    nuevaRuta[insertIdx] = piezaExtraida;
+                    sucesor.rutas[h1] = nuevaRuta;
                 }
             }
 
