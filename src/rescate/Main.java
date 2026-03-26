@@ -1,7 +1,10 @@
 package rescate;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import aima.search.framework.Problem;
@@ -69,8 +72,13 @@ public class Main {
         }
 
         // 5. DETERMINAR OPERADORES A USAR
-        String operadores = params.getOrDefault("operadores", "swap+move");
-        // TODO: Seleccionar operadores (swap / move / swap + move)
+        String operadoresStr = params.getOrDefault("operadores", "swap+move");
+        List<String> operadores = Arrays.asList(operadoresStr.split("\\+"));
+
+        List<String> operadoresPermitidos = Arrays.asList("move", "swap");
+        if (!operadoresPermitidos.containsAll(operadores)) {
+            throw new IllegalArgumentException("Los argumentos contienen operadores desconocidos: " + operadores + ". Los únicos que se permiten son: " + operadoresPermitidos);
+        }
 
         // 4. EJECUTAR ALGORITMO
         String algoritmo = params.getOrDefault("algoritmo", "hc");
@@ -78,7 +86,7 @@ public class Main {
         ResultadoBusqueda r;
         if (algoritmo.equals("hc")) {
             // 1. Ejecutamos Hill Climbing
-            r = DesastresHillClimbingSearch(board, costeInicial);
+            r = DesastresHillClimbingSearch(board, costeInicial, operadores);
 
         } else if (algoritmo.equals("sa")) {
             // Recogemos todos los parámetros de SA
@@ -88,7 +96,7 @@ public class Main {
             double lambda = Double.parseDouble(params.getOrDefault("lambda", "0.001"));
 
             // 2. Ejecutamos Simulated Annealing
-            r = DesastresSimulatedAnnealingSearch(board, costeInicial, steps, stiter, k, lambda);
+            r = DesastresSimulatedAnnealingSearch(board, costeInicial, operadores, steps, stiter, k, lambda);
 
         } else {
             System.err.println("Algoritmo desconocido: " + algoritmo);
@@ -110,14 +118,14 @@ public class Main {
         System.out.println("TIEMPO_MS=" + df.format(r.tiempoMs));
     }
 
-    private static ResultadoBusqueda DesastresHillClimbingSearch(Board board, double costeInicial) {
+    private static ResultadoBusqueda DesastresHillClimbingSearch(Board board, double costeInicial, List<String> operadores) {
         System.out.println("\n>>> Ejecutando HILL CLIMBING <<<");
         try {
             // TODO: Tener en cuenta Función Heurística (1 o 2)
             // Reiniciamos el rastreador de la heurística
             HeuristicFunction1.mejorCoste = costeInicial;
             
-            Problem problem = new Problem(board, new SuccessorFunctionHC(), new GoalTestFalse(), new HeuristicFunction1());
+            Problem problem = new Problem(board, new SuccessorFunctionHC(operadores), new GoalTestFalse(), new HeuristicFunction1());
             Search search = new HillClimbingSearch();
 
             long inicio = System.nanoTime();
@@ -139,7 +147,7 @@ public class Main {
         }
     }
 
-    private static ResultadoBusqueda DesastresSimulatedAnnealingSearch(Board board, double costeInicial, int steps, int stiter, int k, double lambda) {
+    private static ResultadoBusqueda DesastresSimulatedAnnealingSearch(Board board, double costeInicial, List<String> operadores, int steps, int stiter, int k, double lambda) {
         System.out.println("\n>>> Ejecutando SIMULATED ANNEALING <<<");
         System.out.println("Steps: " + steps + " | Stiter: " + stiter + " | K: " + k + " | Lambda: " + lambda);
         try {
@@ -147,7 +155,7 @@ public class Main {
             // Reiniciamos el rastreador de la heurística
             HeuristicFunction1.mejorCoste = costeInicial;
             
-            Problem problem = new Problem(board, new SuccessorFunctionSA(), new GoalTestFalse(), new HeuristicFunction1());
+            Problem problem = new Problem(board, new SuccessorFunctionSA(operadores), new GoalTestFalse(), new HeuristicFunction1());
             
             // Parámetros: pasos máximos, iteraciones por paso de temp, factor K, ratio de caída Lambda
             Search search = new SimulatedAnnealingSearch(steps, stiter, k, lambda);

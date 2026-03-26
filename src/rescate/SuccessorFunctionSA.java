@@ -11,7 +11,13 @@ public class SuccessorFunctionSA implements SuccessorFunction {
 
     private Random random = new Random();
 
-    public List getSuccessors(Object state) {
+    private final List<String> operadores;
+
+    public SuccessorFunctionSA(List<String> operadores) {
+        this.operadores = operadores;
+    }
+
+    public List<Successor> getSuccessors(Object state) {
         ArrayList<Successor> retval = new ArrayList<>();
         Board boardActual = (Board) state;
 

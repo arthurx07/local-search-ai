@@ -8,13 +8,33 @@ import java.util.ArrayList;
 // def. función generadora estados accesibles
 public class SuccessorFunctionHC implements SuccessorFunction {
 
-    public List getSuccessors(Object state) {
-        ArrayList<Successor> retval = new ArrayList<>(); 
+    private final List<String> operadores;
+
+    public SuccessorFunctionHC(List<String> operadores) {
+        this.operadores = operadores;
+    }
+
+    public List<Successor> getSuccessors(Object state) {
+        List<Successor> successors = new ArrayList<>();
         Board boardActual = (Board) state;
 
-        // ==========================================
-        // OPERADOR 1: SWAP (Intercambio)
-        // ==========================================
+        if (operadores.contains("swap")) {
+            successors.addAll(generarSwap(boardActual));
+        }
+
+        if (operadores.contains("move")) {
+            successors.addAll(generarMove(boardActual));
+        }
+
+        return successors;
+    }
+
+    // ==========================================
+    // OPERADOR 1: SWAP (Intercambio)
+    // ==========================================
+    private List<Successor> generarSwap(Board boardActual) {
+        List<Successor> sucesores = new ArrayList<>();
+
         for (int h1 = 0; h1 < Board.numHelicopterosTotal; h1++) {
             if (boardActual.rutas[h1] == null) continue;
             
@@ -45,16 +65,21 @@ public class SuccessorFunctionHC implements SuccessorFunction {
 
                         // 3. VALIDAR RESTRICCIONES
                         if (sucesor.esValido()) {
-                            retval.add(new Successor("SWAP: G" + grupoA + " con G" + grupoB, sucesor));
+                            sucesores.add(new Successor("SWAP: G" + grupoA + " con G" + grupoB, sucesor));
                         }
                     }
                 }
             }
         }
+        return sucesores;
+    }
 
-        // ==========================================
-        // OPERADOR 2: MOVE (Mover a otro helicóptero)
-        // ==========================================
+    // ==========================================
+    // OPERADOR 2: MOVE (Mover a otro helicóptero)
+    // ==========================================
+    private List<Successor> generarMove(Board boardActual) {
+        List<Successor> sucesores = new ArrayList<>();
+
         for (int h1 = 0; h1 < Board.numHelicopterosTotal; h1++) {
             if (boardActual.rutas[h1] == null) continue;
             for (int p1 = 0; p1 < boardActual.rutas[h1].length; p1++) {
@@ -103,13 +128,12 @@ public class SuccessorFunctionHC implements SuccessorFunction {
                         sucesor.limpiarYReestructurar();
                         
                         if (sucesor.esValido()) {
-                            retval.add(new Successor("MOVE: G" + grupoA + " a Heli " + h2, sucesor));
+                            sucesores.add(new Successor("MOVE: G" + grupoA + " a Heli " + h2, sucesor));
                         }
                     }
                 }
             }
         }
-
-        return retval;
+        return sucesores;
     }
 }
