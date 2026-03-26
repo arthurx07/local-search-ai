@@ -14,7 +14,6 @@ public class Board {
     public static int numCentros;
     public static int numHelicopterosPorCentro;
     public static int numHelicopterosTotal;
-    public static int semilla;
     
     // Arrays para las características de los grupos
     public static int[] personasPorGrupo;
@@ -38,7 +37,6 @@ public class Board {
         numCentros = nCentros;
         numHelicopterosPorCentro = nHelicop;
         numHelicopterosTotal = nCentros * nHelicop;
-        semilla = seed;
         
         personasPorGrupo = new int[numGrupos];
         prioridadGrupo = new int[numGrupos];
@@ -48,8 +46,8 @@ public class Board {
         tiempoViaje = new double[totalNodos][totalNodos];
         
         // Generar los objetos de la librería usando la semilla
-        Grupos gruposIA = new Grupos(numGrupos, semilla);
-        Centros centrosIA = new Centros(numCentros, numHelicopterosPorCentro, semilla);
+        Grupos gruposIA = new Grupos(numGrupos, seed);
+        Centros centrosIA = new Centros(numCentros, numHelicopterosPorCentro, seed);
         
         // 1. Rellenar el tiempo de recogida precalculado (Ahorra el IF en la heurística)
         for (int i = 0; i < numGrupos; i++) {
@@ -156,16 +154,9 @@ public class Board {
         int[] personasActuales = new int[numHelicopterosTotal];
         int[] gruposEnEsteViaje = new int[numHelicopterosTotal];
 
-        Random rnd = new Random(semilla);
-        // TODO: decidir qué semilla usar
-/*
-Objetivo	                                | Semilla recomendada
--------------------------------------------------------------------------------
-Reproducibilidad (experimentos, informes)	| Semilla fija o pasada por parámetro
-Aleatoriedad real	                        | System.currentTimeMillis()
-Aleatoriedad fuerte	                      | SecureRandom
-Aleatoriedad dependiente del problema	    | Objects.hash(...)
-*/
+        // Usamos tiempo, y no "semilla" para que sea realmente aleatorio.
+        // No tenemos reproducibilidad.
+        Random rnd = new Random(System.currentTimeMillis());
 
         // Recorremos todos los grupos a rescatar
         for (int grupoId = 0; grupoId < numGrupos; grupoId++) {
