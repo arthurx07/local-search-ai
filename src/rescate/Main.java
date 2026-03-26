@@ -34,7 +34,9 @@ public class Main {
         int tipoEstado = inicial.equals("aleatorio") ? 0 : 1;
         Board board = new Board(tipoEstado);
 
-        if (!inicial.equals("greedy") && !inicial.equals("aleatorio")) System.err.println("Generador de estado inicial desconocido: " + inicial);
+        if (!inicial.equals("greedy") && !inicial.equals("aleatorio")) {
+            System.err.println("Generador de estado inicial desconocido: " + inicial);
+        }
         
         // 3. PROBAR LA HEURÍSTICA DEL ESTADO INICIAL
         int tipoHeuristica = Integer.parseInt(params.getOrDefault("heuristica", "1"));
@@ -47,7 +49,7 @@ public class Main {
             if (tipoHeuristica != 2) System.err.println("Función Heurística desconocida: " + tipoHeuristica);
         }
 
-        System.out.println("Coste de la solución inicial (" + tipoHeuristica + "):" + costeInicial + " minutos.");
+        System.out.println("Coste de la solución inicial (" + tipoHeuristica + "): " + costeInicial + " minutos.");
 
         // 5. DETERMINAR OPERADORES A USAR
         String operadores = params.getOrDefault("operadores", "swap+move");
@@ -61,15 +63,16 @@ public class Main {
         // 1. Ejecutamos Hill Climbing
             DesastresHillClimbingSearch(board, costeInicial);
         } else if (algoritmo.equals("sa")) {
-        // 2. Ejecutamos Simulated Annealing
+            // Recogemos todos los parámetros de SA (incluyendo stiter)
             int steps     = Integer.parseInt(params.getOrDefault("steps", "2000"));
+            int stiter    = Integer.parseInt(params.getOrDefault("stiter", "100"));
             int k         = Integer.parseInt(params.getOrDefault("k", "5"));
             double lambda = Double.parseDouble(params.getOrDefault("lambda", "0.001"));
             // ¿stiter?
             // SimulatedAnnealingSearch search =  new SimulatedAnnealingSearch(2000,100,5,0.001);
             // SimulatedAnnealingSearch(int steps, int stiter, int k, double lamb)
-
-            DesastresSimulatedAnnealingSearch(board, costeInicial);
+            // 2. Ejecutamos Simulated Annealing
+            DesastresSimulatedAnnealingSearch(board, costeInicial, steps, stiter, k, lambda);
         } else {
             System.err.println("Algoritmo desconocido: " + algoritmo);
         }
@@ -117,8 +120,10 @@ public class Main {
         }
     }
 
-    private static void DesastresSimulatedAnnealingSearch(Board board, double costeInicial) {
-        System.out.println("\n--- Ejecutando Simulated Annealing ---");
+    // AÑADIDOS LOS PARÁMETROS EN LA FIRMA DE LA FUNCIÓN
+    private static void DesastresSimulatedAnnealingSearch(Board board, double costeInicial, int steps, int stiter, int k, double lambda) {
+        System.out.println("\n\n>>> Ejecutando SIMULATED ANNEALING <<<");
+        System.out.println("Parámetros -> Steps: " + steps + " | Stiter: " + stiter + " | K: " + k + " | Lambda: " + lambda);
         try {
             // Reiniciamos el rastreador de la heurística
             HeuristicFunction1.mejorCoste = costeInicial;
@@ -126,11 +131,25 @@ public class Main {
             Problem problem = new Problem(board, new SuccessorFunctionSA(), new GoalTestFalse(), new HeuristicFunction1());
             
             // Parámetros: pasos máximos, iteraciones por paso de temp, factor K, ratio de caída Lambda
-            Search search = new SimulatedAnnealingSearch(2000, 100, 5, 0.001);
+            Search search = new SimulatedAnnealingSearch(steps, stiter, k, lambda);
+
+            long inicio = System.nanoTime();
             SearchAgent agent = new SearchAgent(problem, search);
+            long fin = System.nanoTime();
+            long tiempoMs = (fin - inicio) / 1_000_000;
             
             System.out.println(agent.getInstrumentation().toString());
-            System.out.println("Coste Final SA: " + HeuristicFunction1.mejorCoste + " minutos.");
+            
+            System.out.println("--------------------------------------------------");
+            System.out.println("¡Búsqueda Finalizada!");
+            System.out.println("Coste Inicial: " + costeInicial + " minutos.");
+            System.out.println("Coste Final:   " + HeuristicFunction1.mejorCoste + " minutos.");
+            double mejora = costeInicial - HeuristicFunction1.mejorCoste;
+            System.out.println("Mejora total:  " + mejora + " minutos.");
+            System.out.println("--------------------------------------------------");
+            
+            System.out.println("COSTE=" + String.format("%.2f", HeuristicFunction1.mejorCoste));
+            System.out.println("TIEMPO_MS=" + tiempoMs);
             
         } catch (Exception e) {
             e.printStackTrace();
@@ -163,11 +182,19 @@ public class Main {
                 switch (flag) {
                     case 'g': map.put("grupos", args[i + 1]); break;
                     case 'c': map.put("centros", args[i + 1]); break;
-                    case 'l': map.put("helicopteros", args[i + 1]); break;
+                    case 'l': map.put("helicopteros", args[i + 1]); break; // -l se queda para helicópteros
                     case 's': map.put("semilla", args[i + 1]); break;
                     case 'i': map.put("inicial", args[i + 1]); break;
                     case 'u': map.put("heuristica", args[i + 1]); break;
                     case 'a': map.put("algoritmo", args[i + 1]); break;
+                    case 'o': map.put("operadores", args[i + 1]); break;
+                    
+                    // NUEVAS LETRAS PARA EVITAR CHOQUES
+                    case 't': map.put("steps", args[i + 1]); break;      // -t (Total steps)
+                    case 'e': map.put("stiter", args[i + 1]); break;     // -e (Evaluations/iterations)
+                    case 'k': map.put("k", args[i + 1]); break;          // -k
+                    case 'd': map.put("lambda", args[i + 1]); break;     // -d (Decay/Lambda)
+                    
                     default:
                         System.err.println("Opción desconocida: -" + flag);
                 }
@@ -196,8 +223,9 @@ public class Main {
         System.out.println();
         System.out.println("Opciones específicas para Simulated Annealing:");
         System.out.println("  -t --steps <n>                        Número de iteraciones totales (default 2000)");
+        System.out.println("  -e --stiter <n>                       Pasos por cada bajada de temp. (default 100)");
         System.out.println("  -k --k <n>                            Escala de temperatura (default 5)");
-        System.out.println("  -l --lambda <n>                       Factor de enfriamiento (default 0.001)");
+        System.out.println("  -d --lambda <n>                       Factor de enfriamiento (default 0.001)");
         System.out.println();
         System.out.println("  -h --help                             Muestra esta ayuda");
         System.out.println();
