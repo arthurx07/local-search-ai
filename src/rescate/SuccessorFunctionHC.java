@@ -117,14 +117,14 @@ public class SuccessorFunctionHC implements SuccessorFunction {
                             for (int i = 0; i < sucesor.rutas[h1].length; i++) {
                                 if (i != p1) nuevaRuta[idx++] = sucesor.rutas[h1][i];
                             }
-                            
+
                             int insertIdx = (p1 < p2) ? p2 - 1 : p2;
                             System.arraycopy(nuevaRuta, insertIdx, nuevaRuta, insertIdx + 1, nuevaRuta.length - 1 - insertIdx);
                             nuevaRuta[insertIdx] = piezaExtraida;
-                            
+
                             sucesor.rutas[h1] = nuevaRuta;
                         }
-                        // ¡LA MAGIA! Limpiamos viajes vacíos y creamos los -1 que falten
+                        // Limpiamos viajes vacíos y creamos los -1 que falten
                         sucesor.limpiarYReestructurar();
                         
                         if (sucesor.esValido()) {

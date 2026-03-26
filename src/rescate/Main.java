@@ -79,6 +79,7 @@ public class Main {
         List<String> operadores = Arrays.asList(operadoresStr.split("\\+"));
 
         List<String> operadoresPermitidos = Arrays.asList("move", "swap");
+        
         if (!operadoresPermitidos.containsAll(operadores)) {
             throw new IllegalArgumentException("Los argumentos contienen operadores desconocidos: " + operadores + ". Los únicos que se permiten son: " + operadoresPermitidos);
         }

@@ -33,12 +33,19 @@ public class SuccessorFunctionSA implements SuccessorFunction {
             int grupoA = sucesor.rutas[h1][p1];
             if (grupoA == -1) continue; // Si hemos pillado un delimitador, repetimos
 
-            // 2. Decidimos al azar qué operador aplicar (50% SWAP, 50% MOVE)
-            boolean hacerSwap = random.nextBoolean();
-            String nombreOp;
+            // 2. Decidimos operador o aplicamos azar (50% SWAP, 50% MOVE)
+            boolean hacerSwap;
+            if (operadores.contains("swap") && !operadores.contains("move")) {
+                hacerSwap = true;
+            } else if (!operadores.contains("swap") && operadores.contains("move")) {
+                hacerSwap = false;
+            } else {
+                hacerSwap = random.nextBoolean();
+            }
 
-            if ((hacerSwap && operadores.contains("swap")) || !operadores.contains("move")) {
-                // --- OPERADOR SWAP ALEATORIO ---
+            String nombreOp = "";
+
+            if (hacerSwap) {
                 int h2 = random.nextInt(Board.numHelicopterosTotal);
                 if (sucesor.rutas[h2] == null || sucesor.rutas[h2].length == 0) continue;
                 
@@ -48,10 +55,12 @@ public class SuccessorFunctionSA implements SuccessorFunction {
 
                 sucesor.rutas[h1][p1] = grupoB;
                 sucesor.rutas[h2][p2] = grupoA;
-
+		//La IA recomana fer:
+		//nombreOp = "SWAP Aleatorio";
+		//ja que concatenar en java amb la cantitat de succesor de SA podria ser un coll d'ampolla
                 nombreOp = "SWAP Aleatorio: G" + grupoA + " con G" + grupoB;
                 
-            } else if (operadores.contains("move")) {
+            } else {
                 // --- OPERADOR MOVE ALEATORIO ---
                 int h2 = random.nextInt(Board.numHelicopterosTotal);
                 if (sucesor.rutas[h2] == null) continue;
@@ -86,16 +95,19 @@ public class SuccessorFunctionSA implements SuccessorFunction {
                     sucesor.rutas[h1] = nuevaRuta;
                 }
 
-                // TODO: Creo que es así pero no lo se a ciencia cierta
+                // Lo mismo de antes, la IA recomienda
+		//nombreOp = "MOVE Aleatorio";
                 nombreOp = "MOVE Aleatorio: G" + grupoA + " a Heli " + h2;
             }
-            else {
-                throw new IllegalArgumentException("Se debe permitir al menos un operador entre swap y move");
-            }
+	    // ja validem al main, principi "Fail-Fast" 
+            //else {
+            //    throw new IllegalArgumentException("Se debe permitir al menos un operador entre swap y move");
+            //}
 
             // 3. Limpiamos y validamos
             sucesor.limpiarYReestructurar();
             if (sucesor.esValido()) {
+                // NOTA: El System.out.println() podria colapsar la terminal.
                 System.out.println(nombreOp);
                 retval.add(new Successor(nombreOp, sucesor));
             }
