@@ -1,5 +1,6 @@
 package rescate;
 
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,6 +11,18 @@ import aima.search.informed.HillClimbingSearch;
 import aima.search.informed.SimulatedAnnealingSearch;
 
 public class Main {
+
+    private static class ResultadoBusqueda {
+        public long tiempoMs;
+        public double costeInicial;
+        public double costeFinal;
+
+        public ResultadoBusqueda(long tiempoMs, double costeInicial, double costeFinal) {
+            this.tiempoMs = tiempoMs;
+            this.costeInicial = costeInicial;
+            this.costeFinal = costeFinal;
+        }
+    }
 
     public static void main(String[] args) throws Exception {
         Map<String, String> params = parseArgs(args);
@@ -35,7 +48,8 @@ public class Main {
         Board board = new Board(tipoEstado);
 
         if (!inicial.equals("greedy") && !inicial.equals("aleatorio")) {
-            System.err.println("Generador de estado inicial desconocido: " + inicial);
+            System.err.println("Generador del estado inicial desconocido: " + inicial);
+            throw new Exception("Generador del estado inicial desconocido");
         }
         
         // 3. PROBAR LA HEURÍSTICA DEL ESTADO INICIAL
@@ -44,45 +58,63 @@ public class Main {
 
         if (tipoHeuristica == 1) {
             costeInicial = new HeuristicFunction1().getHeuristicValue(board);
+
         } else {
             costeInicial = new HeuristicFunction2().getHeuristicValue(board);
-            if (tipoHeuristica != 2) System.err.println("Función Heurística desconocida: " + tipoHeuristica);
-        }
 
-        System.out.println("Coste de la solución inicial (" + tipoHeuristica + "): " + costeInicial + " minutos.");
+            if (tipoHeuristica != 2) {
+                System.err.println("Función Heurística desconocida: " + tipoHeuristica);
+                throw new Exception("Función Heurística desconocida");
+            }
+        }
 
         // 5. DETERMINAR OPERADORES A USAR
         String operadores = params.getOrDefault("operadores", "swap+move");
         // TODO: Seleccionar operadores (swap / move / swap + move)
 
         // 4. EJECUTAR ALGORITMO
-
         String algoritmo = params.getOrDefault("algoritmo", "hc");
 
+        ResultadoBusqueda r;
         if (algoritmo.equals("hc")) {
-        // 1. Ejecutamos Hill Climbing
-            DesastresHillClimbingSearch(board, costeInicial);
+            // 1. Ejecutamos Hill Climbing
+            r = DesastresHillClimbingSearch(board, costeInicial);
+
         } else if (algoritmo.equals("sa")) {
-            // Recogemos todos los parámetros de SA (incluyendo stiter)
+            // Recogemos todos los parámetros de SA
             int steps     = Integer.parseInt(params.getOrDefault("steps", "2000"));
             int stiter    = Integer.parseInt(params.getOrDefault("stiter", "100"));
             int k         = Integer.parseInt(params.getOrDefault("k", "5"));
             double lambda = Double.parseDouble(params.getOrDefault("lambda", "0.001"));
-            // ¿stiter?
-            // SimulatedAnnealingSearch search =  new SimulatedAnnealingSearch(2000,100,5,0.001);
-            // SimulatedAnnealingSearch(int steps, int stiter, int k, double lamb)
+
             // 2. Ejecutamos Simulated Annealing
-            DesastresSimulatedAnnealingSearch(board, costeInicial, steps, stiter, k, lambda);
+            r = DesastresSimulatedAnnealingSearch(board, costeInicial, steps, stiter, k, lambda);
+
         } else {
             System.err.println("Algoritmo desconocido: " + algoritmo);
+            throw new IllegalArgumentException("Algoritmo desconocido");
         }
+
+        // 5. IMPRIMIR RESULTADOS
+        DecimalFormat df = new DecimalFormat("#.00"); // solo dos decimales
+        System.out.println("--------------------------------------------------");
+        System.out.println("¡Búsqueda Finalizada!");
+        System.out.println("Coste Inicial: " + df.format(r.costeInicial) + " minutos.");
+        System.out.println("Coste Final:   " + df.format(r.costeFinal)   + " minutos.");
+        double mejora = costeInicial - r.costeFinal;
+        System.out.println("Mejora total:  " + df.format(mejora) + " minutos.");
+        System.out.println("--------------------------------------------------");
+
+        // Específico para experimentos
+        System.out.println("COSTE=" + df.format(r.costeFinal));
+        System.out.println("TIEMPO_MS=" + df.format(r.tiempoMs));
     }
 
-    private static void DesastresHillClimbingSearch(Board board, double costeInicial) {
-        System.out.println("\n\n>>> Ejecutando HILL CLIMBING <<<");
+    private static ResultadoBusqueda DesastresHillClimbingSearch(Board board, double costeInicial) {
+        System.out.println("\n>>> Ejecutando HILL CLIMBING <<<");
         try {
             // TODO: Tener en cuenta Función Heurística (1 o 2)
-            // Reiniciamos el rastreador por si hacemos varios experimentos
+            // Reiniciamos el rastreador de la heurística
             HeuristicFunction1.mejorCoste = costeInicial;
             
             Problem problem = new Problem(board, new SuccessorFunctionHC(), new GoalTestFalse(), new HeuristicFunction1());
@@ -98,33 +130,20 @@ public class Main {
                 System.out.println(action.toString());
             }
             System.out.println(agent.getInstrumentation().toString());
-            
-            // =======================================================
-            // --- NUEVO CÓDIGO PARA IMPRIMIR EL COSTE FINAL ---
-            // =======================================================
-            System.out.println("--------------------------------------------------");
-            System.out.println("¡Búsqueda Finalizada!");
-            System.out.println("Coste Inicial: " + costeInicial + " minutos.");
-            System.out.println("Coste Final:   " + HeuristicFunction1.mejorCoste + " minutos.");
-            double mejora = costeInicial - HeuristicFunction1.mejorCoste;
-            System.out.println("Mejora total:  " + mejora + " minutos.");
-            System.out.println("--------------------------------------------------");
-            // =======================================================
-            
-            // PARA EXPERIMENTOS
-            System.out.println("COSTE=" + String.format("%.2f", HeuristicFunction1.mejorCoste)); // solo dos decimales
-            System.out.println("TIEMPO_MS=" + tiempoMs);
+
+            return new ResultadoBusqueda(tiempoMs, costeInicial, HeuristicFunction1.mejorCoste);
 
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException("Búsqueda fallida.");
         }
     }
 
-    // AÑADIDOS LOS PARÁMETROS EN LA FIRMA DE LA FUNCIÓN
-    private static void DesastresSimulatedAnnealingSearch(Board board, double costeInicial, int steps, int stiter, int k, double lambda) {
-        System.out.println("\n\n>>> Ejecutando SIMULATED ANNEALING <<<");
-        System.out.println("Parámetros -> Steps: " + steps + " | Stiter: " + stiter + " | K: " + k + " | Lambda: " + lambda);
+    private static ResultadoBusqueda DesastresSimulatedAnnealingSearch(Board board, double costeInicial, int steps, int stiter, int k, double lambda) {
+        System.out.println("\n>>> Ejecutando SIMULATED ANNEALING <<<");
+        System.out.println("Steps: " + steps + " | Stiter: " + stiter + " | K: " + k + " | Lambda: " + lambda);
         try {
+            // TODO: Tener en cuenta Función Heurística (1 o 2)
             // Reiniciamos el rastreador de la heurística
             HeuristicFunction1.mejorCoste = costeInicial;
             
@@ -138,21 +157,17 @@ public class Main {
             long fin = System.nanoTime();
             long tiempoMs = (fin - inicio) / 1_000_000;
             
+            System.out.println();
+            for (Object action : agent.getActions()) {
+                System.out.println(action.toString());
+            }
             System.out.println(agent.getInstrumentation().toString());
             
-            System.out.println("--------------------------------------------------");
-            System.out.println("¡Búsqueda Finalizada!");
-            System.out.println("Coste Inicial: " + costeInicial + " minutos.");
-            System.out.println("Coste Final:   " + HeuristicFunction1.mejorCoste + " minutos.");
-            double mejora = costeInicial - HeuristicFunction1.mejorCoste;
-            System.out.println("Mejora total:  " + mejora + " minutos.");
-            System.out.println("--------------------------------------------------");
-            
-            System.out.println("COSTE=" + String.format("%.2f", HeuristicFunction1.mejorCoste));
-            System.out.println("TIEMPO_MS=" + tiempoMs);
+            return new ResultadoBusqueda(tiempoMs, costeInicial, HeuristicFunction1.mejorCoste);
             
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException("Búsqueda fallida.");
         }
     }
 
