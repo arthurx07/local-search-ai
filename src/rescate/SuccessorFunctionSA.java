@@ -35,8 +35,9 @@ public class SuccessorFunctionSA implements SuccessorFunction {
 
             // 2. Decidimos al azar qué operador aplicar (50% SWAP, 50% MOVE)
             boolean hacerSwap = random.nextBoolean();
+            String nombreOp;
 
-            if (hacerSwap) {
+            if ((hacerSwap && operadores.contains("swap")) || !operadores.contains("move")) {
                 // --- OPERADOR SWAP ALEATORIO ---
                 int h2 = random.nextInt(Board.numHelicopterosTotal);
                 if (sucesor.rutas[h2] == null || sucesor.rutas[h2].length == 0) continue;
@@ -47,8 +48,10 @@ public class SuccessorFunctionSA implements SuccessorFunction {
 
                 sucesor.rutas[h1][p1] = grupoB;
                 sucesor.rutas[h2][p2] = grupoA;
+
+                nombreOp = "SWAP Aleatorio: G" + grupoA + " con G" + grupoB;
                 
-            } else {
+            } else if (operadores.contains("move")) {
                 // --- OPERADOR MOVE ALEATORIO ---
                 int h2 = random.nextInt(Board.numHelicopterosTotal);
                 if (sucesor.rutas[h2] == null) continue;
@@ -82,12 +85,18 @@ public class SuccessorFunctionSA implements SuccessorFunction {
                     nuevaRuta[insertIdx] = piezaExtraida;
                     sucesor.rutas[h1] = nuevaRuta;
                 }
+
+                // TODO: Creo que es así pero no lo se a ciencia cierta
+                nombreOp = "MOVE Aleatorio: G" + grupoA + " a Heli " + h2;
+            }
+            else {
+                throw new IllegalArgumentException("Se debe permitir al menos un operador entre swap y move");
             }
 
             // 3. Limpiamos y validamos
             sucesor.limpiarYReestructurar();
             if (sucesor.esValido()) {
-                String nombreOp = hacerSwap ? "SWAP Aleatorio" : "MOVE Aleatorio";
+                System.out.println(nombreOp);
                 retval.add(new Successor(nombreOp, sucesor));
             }
         }
