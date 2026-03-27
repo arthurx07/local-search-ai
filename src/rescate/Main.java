@@ -89,8 +89,8 @@ public class Main {
 
         ResultadoBusqueda r;
         if (algoritmo.equals("hc")) {
-            // 1. Ejecutamos Hill Climbing
-            r = DesastresHillClimbingSearch(board, costeInicial, operadores);
+            // 1. Ejecutamos Hill Climbing (Pasamos el tipo de heurística)
+            r = DesastresHillClimbingSearch(board, costeInicial, operadores, tipoHeuristica);
 
         } else if (algoritmo.equals("sa")) {
             // Recogemos todos los parámetros de SA
@@ -99,8 +99,8 @@ public class Main {
             int k         = Integer.parseInt(params.getOrDefault("k", "5"));
             double lambda = Double.parseDouble(params.getOrDefault("lambda", "0.001"));
 
-            // 2. Ejecutamos Simulated Annealing
-            r = DesastresSimulatedAnnealingSearch(board, costeInicial, operadores, steps, stiter, k, lambda);
+            // 2. Ejecutamos Simulated Annealing (Pasamos el tipo de heurística)
+            r = DesastresSimulatedAnnealingSearch(board, costeInicial, operadores, steps, stiter, k, lambda, tipoHeuristica);
 
         } else {
             System.err.println("Algoritmo desconocido: " + algoritmo);
@@ -122,14 +122,22 @@ public class Main {
         System.out.println("TIEMPO_MS=" + df.format(r.tiempoMs));
     }
 
-    private static ResultadoBusqueda DesastresHillClimbingSearch(Board board, double costeInicial, List<String> operadores) {
+    private static ResultadoBusqueda DesastresHillClimbingSearch(Board board, double costeInicial, List<String> operadores, int tipoHeuristica) {
         System.out.println("\n>>> Ejecutando HILL CLIMBING <<<");
+        System.out.println("Heurística: " + tipoHeuristica);
         try {
             // TODO: Tener en cuenta Función Heurística (1 o 2)
-            // Reiniciamos el rastreador de la heurística
-            HeuristicFunction1.mejorCoste = costeInicial;
+            // Reiniciamos el rastreador y seleccionamos la heurística adecuada
+            aima.search.framework.HeuristicFunction hf;
+            if (tipoHeuristica == 1) {
+                HeuristicFunction1.mejorCoste = costeInicial;
+                hf = new HeuristicFunction1();
+            } else {
+                HeuristicFunction2.mejorCoste = costeInicial;
+                hf = new HeuristicFunction2();
+            }
             
-            Problem problem = new Problem(board, new SuccessorFunctionHC(operadores), new GoalTestFalse(), new HeuristicFunction1());
+            Problem problem = new Problem(board, new SuccessorFunctionHC(operadores), new GoalTestFalse(), hf);
             Search search = new HillClimbingSearch();
 
             long inicio = System.nanoTime();
@@ -143,7 +151,9 @@ public class Main {
             }
             System.out.println(agent.getInstrumentation().toString());
 
-            return new ResultadoBusqueda(tiempoMs, costeInicial, HeuristicFunction1.mejorCoste);
+            // Devolvemos el coste final correcto dependiendo de la heurística
+            double costeFinalReal = (tipoHeuristica == 1) ? HeuristicFunction1.mejorCoste : HeuristicFunction2.mejorCoste;
+            return new ResultadoBusqueda(tiempoMs, costeInicial, costeFinalReal);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -151,15 +161,23 @@ public class Main {
         }
     }
 
-    private static ResultadoBusqueda DesastresSimulatedAnnealingSearch(Board board, double costeInicial, List<String> operadores, int steps, int stiter, int k, double lambda) {
+    private static ResultadoBusqueda DesastresSimulatedAnnealingSearch(Board board, double costeInicial, List<String> operadores, int steps, int stiter, int k, double lambda, int tipoHeuristica) {
         System.out.println("\n>>> Ejecutando SIMULATED ANNEALING <<<");
+        System.out.println("Heurística: " + tipoHeuristica);
         System.out.println("Steps: " + steps + " | Stiter: " + stiter + " | K: " + k + " | Lambda: " + lambda);
         try {
             // TODO: Tener en cuenta Función Heurística (1 o 2)
-            // Reiniciamos el rastreador de la heurística
-            HeuristicFunction1.mejorCoste = costeInicial;
+            // Reiniciamos el rastreador y seleccionamos la heurística adecuada
+            aima.search.framework.HeuristicFunction hf;
+            if (tipoHeuristica == 1) {
+                HeuristicFunction1.mejorCoste = costeInicial;
+                hf = new HeuristicFunction1();
+            } else {
+                HeuristicFunction2.mejorCoste = costeInicial;
+                hf = new HeuristicFunction2();
+            }
             
-            Problem problem = new Problem(board, new SuccessorFunctionSA(operadores), new GoalTestFalse(), new HeuristicFunction1());
+            Problem problem = new Problem(board, new SuccessorFunctionSA(operadores), new GoalTestFalse(), hf);
             
             // Parámetros: pasos máximos, iteraciones por paso de temp, factor K, ratio de caída Lambda
             Search search = new SimulatedAnnealingSearch(steps, stiter, k, lambda);
@@ -175,7 +193,9 @@ public class Main {
             }
             System.out.println(agent.getInstrumentation().toString());
             
-            return new ResultadoBusqueda(tiempoMs, costeInicial, HeuristicFunction1.mejorCoste);
+            // Devolvemos el coste final correcto dependiendo de la heurística
+            double costeFinalReal = (tipoHeuristica == 1) ? HeuristicFunction1.mejorCoste : HeuristicFunction2.mejorCoste;
+            return new ResultadoBusqueda(tiempoMs, costeInicial, costeFinalReal);
             
         } catch (Exception e) {
             e.printStackTrace();
