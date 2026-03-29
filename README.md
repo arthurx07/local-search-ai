@@ -1,8 +1,10 @@
 # Búsqueda Local IA - FIB 2026 Q2
 
-*Herman Daniel Berrio*
-*Artur Leivar*
-*Marc Pérez*
+*Herman Daniel Berrio*  
+*Artur Leivar*  
+*Marc Pérez*  
+
+## Instrucciones
 
 Para correr el programa existen dos alternativas.  
 
