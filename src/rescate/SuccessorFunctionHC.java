@@ -87,7 +87,7 @@ public class SuccessorFunctionHC implements SuccessorFunction {
                 if (grupoA == -1) continue;
 
                 for (int h2 = 0; h2 < Board.numHelicopterosTotal; h2++) {
-                    // Ahora permitimos h1 == h2 para que pueda mover el grupo a un NUEVO viaje dentro del mismo helicóptero
+                    // Permitimos h1 == h2 para que pueda mover el grupo a un NUEVO viaje dentro del mismo helicóptero
                     if (boardActual.rutas[h2] == null) continue;
 
                     // p2 puede llegar hasta el .length para insertarlo al final del todo (creando un viaje nuevo)

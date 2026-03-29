@@ -240,7 +240,7 @@ public class Main {
                 switch (flag) {
                     case 'g': map.put("grupos", args[i + 1]); break;
                     case 'c': map.put("centros", args[i + 1]); break;
-                    case 'l': map.put("helicopteros", args[i + 1]); break; // -l se queda para helicópteros
+                    case 'l': map.put("helicopteros", args[i + 1]); break;
                     case 's': map.put("semilla", args[i + 1]); break;
                     case 'i': map.put("inicial", args[i + 1]); break;
                     case 'u': map.put("heuristica", args[i + 1]); break;
@@ -253,7 +253,7 @@ public class Main {
                     case 'k': map.put("k", args[i + 1]); break;          // -k
                     case 'd': map.put("lambda", args[i + 1]); break;     // -d (Decay/Lambda)
 
-                    case 'z': map.put("opt3", args[i + 1]); break; // NUEVA LETRA 'z' para OPTIMIZADOR
+                    case 'z': map.put("opt3", args[i + 1]); break; // letra 'z' para OPTIMIZADOR
                     
                     default:
                         System.err.println("Opción desconocida: -" + flag);
