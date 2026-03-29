@@ -207,7 +207,7 @@ exp4() {
     local GRUPOS_INI=100  CENTROS_INI=5  HELICOPTEROS=1
     local HEURISTICA=1
     local ALGORITMOS=("hc" "sa")
-    local ESCALADOS=8   # 100→800 grupos, 5→40 centros
+    local ESCALADOS=4 # 8   # 100→800 grupos, 5→40 centros
 
     for RUN in $(seq 1 "$REPS"); do
         local SEMILLA=$RANDOM
