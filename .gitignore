@@ -1,3 +1,7 @@
+# Propias de este repositorio
+bin/
+programa.jar
+
 # Compiled class file
 *.class
 
