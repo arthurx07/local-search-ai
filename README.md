@@ -33,6 +33,7 @@ Opciones:
   -s --semilla <n>                      Semilla aleatoria (default 1234)
   -i --inicial <greedy|aleatorio>       Generación del estado inicial (default greedy)
   -u --heuristica <1|2>                 Heurística a usar (default 1)
+  -w --weight <n>                       Peso para la heurística 2, si se usa (default 5.0)
   -a --algoritmo <hc|sa>                Algoritmo de búsqueda (default hc)
   -o --operadores <swap|move|swap+move> Operadores (default swap+move)
   -z --opt3 <true|false>                Optimizador local de 3 grupos (default true)

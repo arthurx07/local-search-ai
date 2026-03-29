@@ -15,6 +15,12 @@ public class HeuristicFunction2 implements HeuristicFunction {
     // Mejor coste evaluado (global, estático)
     public static double mejorCoste = Double.MAX_VALUE;
 
+    private final double weight;
+
+    public HeuristicFunction2(double weight) {
+        this.weight = weight;
+    }
+
     public double getHeuristicValue(Object state) {
         Board board = (Board) state;
         
@@ -65,10 +71,7 @@ public class HeuristicFunction2 implements HeuristicFunction {
             tiempoTotalSumado += (tiempoHeliAcumulado - 10.0);
         }
         
-        // PONDERACIÓN: Multiplicador para priorizar el rescate de P1
-        double pesoPrioridad1 = 5.0; 
-        
-        double heuristicaFinal = tiempoTotalSumado + (tiempoMaximoLlegadaP1 * pesoPrioridad1);
+        double heuristicaFinal = tiempoTotalSumado + (tiempoMaximoLlegadaP1 * weight);
         
         // Rastreador para los prints del Main
         if (heuristicaFinal < mejorCoste) {

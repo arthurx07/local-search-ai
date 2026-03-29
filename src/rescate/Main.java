@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import aima.search.framework.HeuristicFunction;
 import aima.search.framework.Problem;
 import aima.search.framework.Search;
 import aima.search.framework.SearchAgent;
@@ -66,11 +67,15 @@ public class Main {
         int tipoHeuristica = Integer.parseInt(params.getOrDefault("heuristica", "1"));
         double costeInicial;
 
+        HeuristicFunction hf;
         if (tipoHeuristica == 1) {
+            hf = new HeuristicFunction1();
             costeInicial = new HeuristicFunction1().getHeuristicValue(board);
 
         } else {
-            costeInicial = new HeuristicFunction2().getHeuristicValue(board);
+            double weight = Double.parseDouble(params.getOrDefault("weight", "5.0"));
+            hf = new HeuristicFunction2(weight);
+            costeInicial = new HeuristicFunction2(weight).getHeuristicValue(board);
 
             if (tipoHeuristica != 2) {
                 System.err.println("Función Heurística desconocida: " + tipoHeuristica);
@@ -94,7 +99,7 @@ public class Main {
         ResultadoBusqueda r;
         if (algoritmo.equals("hc")) {
             // 1. Ejecutamos Hill Climbing (Pasamos el tipo de heurística)
-            r = DesastresHillClimbingSearch(board, costeInicial, operadores, tipoHeuristica);
+            r = DesastresHillClimbingSearch(board, costeInicial, operadores, hf);
 
         } else if (algoritmo.equals("sa")) {
             // Recogemos todos los parámetros de SA
@@ -104,7 +109,7 @@ public class Main {
             double lambda = Double.parseDouble(params.getOrDefault("lambda", "0.001"));
 
             // 2. Ejecutamos Simulated Annealing (Pasamos el tipo de heurística)
-            r = DesastresSimulatedAnnealingSearch(board, costeInicial, operadores, steps, stiter, k, lambda, tipoHeuristica);
+            r = DesastresSimulatedAnnealingSearch(board, costeInicial, operadores, steps, stiter, k, lambda, hf);
 
         } else {
             System.err.println("Algoritmo desconocido: " + algoritmo);
@@ -126,18 +131,15 @@ public class Main {
         System.out.println("TIEMPO_MS=" + df.format(r.tiempoMs));
     }
 
-    private static ResultadoBusqueda DesastresHillClimbingSearch(Board board, double costeInicial, List<String> operadores, int tipoHeuristica) {
+    private static ResultadoBusqueda DesastresHillClimbingSearch(Board board, double costeInicial, List<String> operadores, HeuristicFunction hf) {
         System.out.println("\n>>> Ejecutando HILL CLIMBING <<<");
-        System.out.println("Heurística: " + tipoHeuristica);
+        System.out.println("Heurística: " + hf.getClass().getSimpleName());
         try {
             // Reiniciamos el rastreador y seleccionamos la heurística adecuada
-            aima.search.framework.HeuristicFunction hf;
-            if (tipoHeuristica == 1) {
+            if (hf instanceof HeuristicFunction1) {
                 HeuristicFunction1.mejorCoste = costeInicial;
-                hf = new HeuristicFunction1();
             } else {
                 HeuristicFunction2.mejorCoste = costeInicial;
-                hf = new HeuristicFunction2();
             }
             
             Problem problem = new Problem(board, new SuccessorFunctionHC(operadores), new GoalTestFalse(), hf);
@@ -157,7 +159,7 @@ public class Main {
             }
 
             // Devolvemos el coste final correcto dependiendo de la heurística
-            double costeFinalReal = (tipoHeuristica == 1) ? HeuristicFunction1.mejorCoste : HeuristicFunction2.mejorCoste;
+            double costeFinalReal = (hf instanceof HeuristicFunction1) ? HeuristicFunction1.mejorCoste : HeuristicFunction2.mejorCoste;
             return new ResultadoBusqueda(tiempoMs, costeInicial, costeFinalReal);
 
         } catch (Exception e) {
@@ -166,19 +168,16 @@ public class Main {
         }
     }
 
-    private static ResultadoBusqueda DesastresSimulatedAnnealingSearch(Board board, double costeInicial, List<String> operadores, int steps, int stiter, int k, double lambda, int tipoHeuristica) {
+    private static ResultadoBusqueda DesastresSimulatedAnnealingSearch(Board board, double costeInicial, List<String> operadores, int steps, int stiter, int k, double lambda, HeuristicFunction hf) {
         System.out.println("\n>>> Ejecutando SIMULATED ANNEALING <<<");
-        System.out.println("Heurística: " + tipoHeuristica);
+        System.out.println("Heurística: " + hf.getClass().getSimpleName());
         System.out.println("Steps: " + steps + " | Stiter: " + stiter + " | K: " + k + " | Lambda: " + lambda);
         try {
             // Reiniciamos el rastreador y seleccionamos la heurística adecuada
-            aima.search.framework.HeuristicFunction hf;
-            if (tipoHeuristica == 1) {
+            if (hf instanceof HeuristicFunction1) {
                 HeuristicFunction1.mejorCoste = costeInicial;
-                hf = new HeuristicFunction1();
             } else {
                 HeuristicFunction2.mejorCoste = costeInicial;
-                hf = new HeuristicFunction2();
             }
             
             Problem problem = new Problem(board, new SuccessorFunctionSA(operadores), new GoalTestFalse(), hf);
@@ -200,7 +199,7 @@ public class Main {
             }
             
             // Devolvemos el coste final correcto dependiendo de la heurística
-            double costeFinalReal = (tipoHeuristica == 1) ? HeuristicFunction1.mejorCoste : HeuristicFunction2.mejorCoste;
+            double costeFinalReal = (hf instanceof HeuristicFunction1) ? HeuristicFunction1.mejorCoste : HeuristicFunction2.mejorCoste;
             return new ResultadoBusqueda(tiempoMs, costeInicial, costeFinalReal);
             
         } catch (Exception e) {
@@ -245,6 +244,7 @@ public class Main {
                     case 's': map.put("semilla", args[i + 1]); break;
                     case 'i': map.put("inicial", args[i + 1]); break;
                     case 'u': map.put("heuristica", args[i + 1]); break;
+                    case 'w': map.put("weight", args[i + 1]); break;
                     case 'a': map.put("algoritmo", args[i + 1]); break;
                     case 'o': map.put("operadores", args[i + 1]); break;
                     
@@ -278,6 +278,7 @@ public class Main {
         System.out.println("  -s --semilla <n>                      Semilla aleatoria (default 1234)");
         System.out.println("  -i --inicial <greedy|aleatorio>       Generación del estado inicial (default greedy)");
         System.out.println("  -u --heuristica <1|2>                 Heurística a usar (default 1)");
+        System.out.println("  -w --weight <n>                       Peso para la heurística 2, si se usa (default 5.0)");
         System.out.println("  -a --algoritmo <hc|sa>                Algoritmo de búsqueda (default hc)");
         System.out.println("  -o --operadores <swap|move|swap+move> Operadores (default swap+move)");
         System.out.println("  -z --opt3 <true|false>                Optimizador local de 3 grupos (default true)");
