@@ -49,6 +49,6 @@ Opciones específicas para Simulated Annealing:
 ```
 
 # Información sobre la organización del repositorio
-El directorio `src` incluye el código fuente del programa.
-El directorio `resultados` contiene los resultados de realizar los experimentos sobre el programa, y las gráficas para poder analizarlos posteriormente.
-El script `experimentos.sh` se ha escrito para automatizar el proceso de experimentación del programa.
+El directorio `src` incluye el código fuente del programa.  
+El directorio `resultados` contiene los resultados de realizar los experimentos sobre el programa, y las gráficas para poder analizarlos posteriormente.  
+El script `experimentos.sh` se ha escrito para automatizar el proceso de experimentación del programa.  
