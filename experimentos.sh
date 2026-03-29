@@ -32,7 +32,7 @@ MEJOR_INICIAL="greedy"      # Opciones: "greedy" | "aleatorio"
 SA_STEPS=10000              # Número total de iteraciones SA
 SA_STITER=100               # Iteraciones por cada cambio de temperatura
 SA_K=5                      # Escala de temperatura
-SA_LAMBDA=0.001              # Factor de enfriamiento
+SA_LAMBDA=0.001             # Factor de enfriamiento
 
 # =============================================================================
 # Función auxiliar principal
@@ -102,8 +102,8 @@ exp1() {
             echo "[EXP1] RUN=$RUN | OPS=$OPS | TIEMPO=$TIEMPO ms | COSTE=$COSTE"
         done
     done
-    echo "✅ Exp1 completado → $CSV"
-    echo "   👉 Revisa el CSV y actualiza MEJOR_OPS al inicio del script."
+    echo "[X] Exp1 completado → $CSV"
+    echo "   - Revisa el CSV y actualiza MEJOR_OPS al inicio del script."
 }
 
 # =============================================================================
@@ -136,8 +136,8 @@ exp2() {
             echo "[EXP2] RUN=$RUN | INI=$INI | TIEMPO=$TIEMPO ms | COSTE=$COSTE"
         done
     done
-    echo "✅ Exp2 completado → $CSV"
-    echo "   👉 Revisa el CSV y actualiza MEJOR_INICIAL al inicio del script."
+    echo "[X] Exp2 completado → $CSV"
+    echo "   - Revisa el CSV y actualiza MEJOR_INICIAL al inicio del script."
 }
 
 # =============================================================================
@@ -187,8 +187,8 @@ exp3() {
             done
         done
     done
-    echo "✅ Exp3 completado → $CSV"
-    echo "   👉 Busca la fila con menor coste medio y actualiza SA_STEPS, SA_K, SA_LAMBDA."
+    echo "[X] Exp3 completado → $CSV"
+    echo "   - Busca la fila con menor coste medio y actualiza SA_STEPS, SA_K, SA_LAMBDA."
 }
 
 # =============================================================================
@@ -234,7 +234,7 @@ exp4() {
             CENTROS=$(( CENTROS + CENTROS_INI ))
         done
     done
-    echo "✅ Exp4 completado → $CSV"
+    echo "[X] Exp4 completado → $CSV"
 }
 
 # =============================================================================
@@ -286,7 +286,7 @@ exp5() {
             CENTROS=$(( CENTROS + CENTROS_AUGM ))
         done
     done
-    echo "✅ Exp5 completado → $CSV"
+    echo "[X] Exp5 completado → $CSV"
 }
 
 # =============================================================================
@@ -320,7 +320,7 @@ exp6() {
             echo "[EXP6] RUN=$RUN | HELIS=$HELICOPTEROS | TIEMPO=$TIEMPO ms | COSTE=$COSTE"
         done
     done
-    echo "✅ Exp6 completado → $CSV"
+    echo "[X] Exp6 completado → $CSV"
 }
 
 # =============================================================================
@@ -374,13 +374,13 @@ exp7() {
             done
         done
     done
-    echo "✅ Exp7 completado → $CSV"
+    echo "[X] Exp7 completado → $CSV"
 }
 
 # =============================================================================
 # Dispatcher
 # =============================================================================
-make jar || { echo "❌ Error al compilar. Comprueba el código Java."; exit 1; }
+make jar || { echo "¡Error al compilar! Comprueba el código Java."; exit 1; }
 
 case "$1" in
     1)   exp1 ;;
@@ -397,12 +397,12 @@ case "$1" in
         echo "Uso: $0 {1|2|3|4|5|6|7|all}"
         echo ""
         echo "ORDEN RECOMENDADO:"
-        echo "  1. ./experimentos.sh 1        → determina MEJOR_OPS"
+        echo "  1. ./experimentos.sh 1        -> determina MEJOR_OPS"
         echo "  2. Actualiza MEJOR_OPS en este script"
-        echo "  3. ./experimentos.sh 2        → determina MEJOR_INICIAL"
+        echo "  3. ./experimentos.sh 2        -> determina MEJOR_INICIAL"
         echo "  4. Actualiza MEJOR_INICIAL en este script"
-        echo "  5. ./experimentos.sh 3        → determina SA_STEPS, SA_K, SA_LAMBDA"
+        echo "  5. ./experimentos.sh 3        -> determina SA_STEPS, SA_K, SA_LAMBDA"
         echo "  6. Actualiza SA_* en este script"
-        echo "  7. ./experimentos.sh 4 5 6 7  (en cualquier orden)"
+        echo "  7. ./experimentos.sh {4|5|6|7}  (en cualquier orden)"
         ;;
 esac
