@@ -25,10 +25,10 @@ public class Board {
     // Matriz de distancias precalculada
     // Índice 0 a numCentros-1 son los Centros.
     // Índice numCentros a numCentros+numGrupos-1 son los Grupos.
-    // Así, si quieres la distancia del Centro 0 al Grupo 5: distancias[0][numCentros + 5]
+    // ejemplo: La distancia del Centro 0 al Grupo 5: distancias[0][numCentros + 5]
     public static double[][] distancias;
 
-    // NUEVAS ESTRUCTURAS DE ALTO RENDIMIENTO
+
     public static int[] tiempoRecogidaPorGrupo;
     public static double[][] tiempoViaje; 
 
@@ -52,7 +52,7 @@ public class Board {
         Grupos gruposIA = new Grupos(numGrupos, seed);
         Centros centrosIA = new Centros(numCentros, numHelicopterosPorCentro, seed);
         
-        // 1. Rellenar el tiempo de recogida precalculado (Ahorra el IF en la heurística)
+        // 1. Rellenar el tiempo de recogida precalculado (Ahorra un IF en la heurística)
         for (int i = 0; i < numGrupos; i++) {
             personasPorGrupo[i] = gruposIA.get(i).getNPersonas();
             prioridadGrupo[i] = gruposIA.get(i).getPrioridad();
@@ -81,8 +81,8 @@ public class Board {
             coordY[numCentros + i] = gruposIA.get(i).getCoordY();
         }
         
-        // 2. Calcular distancias Y tiempos de viaje precalculados (Ahorra el * 0.6 en la heurística)
-        // OPTIMIZACIÓN SIMÉTRICA: [i][j] = [j][i] (Ahorra el 50% de las raíces cuadradas)
+        // 2. Calcular distancias Y tiempos de viaje precalculados (Ahorramos * 0.6 en la heurística)
+        //  SIMÉTRIA EN LA DISTANCIAS Y TIEMPOS: [i][j] = [j][i]
         for (int i = 0; i < totalNodos; i++) {
             // La distancia de un nodo a sí mismo es 0
             distancias[i][i] = 0.0;
@@ -377,7 +377,7 @@ public class Board {
     // Función auxiliar: Optimizador Local (Sub-TSP de 3 nodos)
     // =============================================================
     private void optimizarViajeDeTres(ArrayList<Integer> viaje, int centroId) {
-        // Medida de seguridad: si no tiene exactamente 3 grupos, salimos
+        // si no tiene exactamente 3 grupos, salimos
         if (viaje.size() != 3) return;
 
         int g1 = viaje.get(0);

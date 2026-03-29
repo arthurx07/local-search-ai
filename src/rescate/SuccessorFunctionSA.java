@@ -55,9 +55,10 @@ public class SuccessorFunctionSA implements SuccessorFunction {
 
                 sucesor.rutas[h1][p1] = grupoB;
                 sucesor.rutas[h2][p2] = grupoA;
-		//La IA recomana fer:
-		//nombreOp = "SWAP Aleatorio";
-		//ja que concatenar en java amb la cantitat de succesor de SA podria ser un coll d'ampolla
+	
+		//La concatenacio en java amb la cantitat de succesor de SA podria ser un coll d'ampolla
+        //la impresió per terminal es opcional y no només serveix per debug, 
+        // sino tambe per veure com funciona de forma didàctica
                 nombreOp = "SWAP Aleatorio: G" + grupoA + " con G" + grupoB;
                 
             } else {
@@ -95,14 +96,9 @@ public class SuccessorFunctionSA implements SuccessorFunction {
                     sucesor.rutas[h1] = nuevaRuta;
                 }
 
-                // Lo mismo de antes, la IA recomienda
-		//nombreOp = "MOVE Aleatorio";
+                // Lo mismo de antes
                 nombreOp = "MOVE Aleatorio: G" + grupoA + " a Heli " + h2;
             }
-	    // ja validem al main, principi "Fail-Fast" 
-            //else {
-            //    throw new IllegalArgumentException("Se debe permitir al menos un operador entre swap y move");
-            //}
 
             // 3. Limpiamos y validamos
             sucesor.limpiarYReestructurar();

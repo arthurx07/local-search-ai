@@ -29,7 +29,7 @@ public class HeuristicFunction1 implements HeuristicFunction {
                 int grupoId = ruta[i];
                 
                 if (grupoId == -1) {
-                    // Volver al centro: sumamos el viaje y los 10 mins SIEMPRE (sin IFs)
+                    // Volver al centro: sumamos el viaje y los 10 mins SIEMPRE
                     tiempoHeli += Board.tiempoViaje[nodoActual][centroId] + 10.0;
                     nodoActual = centroId;
 
