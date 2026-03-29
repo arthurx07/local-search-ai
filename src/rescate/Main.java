@@ -130,7 +130,6 @@ public class Main {
         System.out.println("\n>>> Ejecutando HILL CLIMBING <<<");
         System.out.println("Heurística: " + tipoHeuristica);
         try {
-            // TODO: Tener en cuenta Función Heurística (1 o 2)
             // Reiniciamos el rastreador y seleccionamos la heurística adecuada
             aima.search.framework.HeuristicFunction hf;
             if (tipoHeuristica == 1) {
@@ -172,7 +171,6 @@ public class Main {
         System.out.println("Heurística: " + tipoHeuristica);
         System.out.println("Steps: " + steps + " | Stiter: " + stiter + " | K: " + k + " | Lambda: " + lambda);
         try {
-            // TODO: Tener en cuenta Función Heurística (1 o 2)
             // Reiniciamos el rastreador y seleccionamos la heurística adecuada
             aima.search.framework.HeuristicFunction hf;
             if (tipoHeuristica == 1) {
@@ -290,8 +288,8 @@ public class Main {
         System.out.println("  -k --k <n>                            Escala de temperatura (default 5)");
         System.out.println("  -d --lambda <n>                       Factor de enfriamiento (default 0.001)");
         System.out.println();
-        System.out.println("  -h --help                             Muestra esta ayuda");
         System.out.println("  -b --debug                            Muestra información extra de la ejecución");
+        System.out.println("  -h --help                             Muestra esta ayuda");
         System.out.println();
     }
 }
