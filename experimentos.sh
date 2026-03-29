@@ -341,19 +341,19 @@ exp7() {
     local RESDIR="$BASE/exp7"
     mkdir -p "$RESDIR"
     local CSV="$RESDIR/runs.csv"
-    echo "exp,run,semilla,algoritmo,peso_h2,tiempo_ms,coste_total,coste_h1" > "$CSV"
+    echo "exp,run,semilla,algoritmo,peso_h2,tiempo_ms,coste" > "$CSV"
 
     local GRUPOS=100  CENTROS=5  HELICOPTEROS=1
     local HEURISTICA=2
     local ALGORITMOS=("hc" "sa")
-    local PESO_LIST=(1 2 4 8 16)   # Doblamos el peso cada vez
+    local PESO_LIST=(0 0.5 1 2 4 8 16 32)   # Doblamos el peso cada vez
 
     for RUN in $(seq 1 "$REPS"); do
         local SEMILLA=$RANDOM
 
         for ALG in "${ALGORITMOS[@]}"; do
             for PESO in "${PESO_LIST[@]}"; do
-                local EXTRA_ARGS=(--peso "$PESO")
+                local EXTRA_ARGS=(--weight "$PESO")
                 if [[ "$ALG" == "sa" ]]; then
                     EXTRA_ARGS+=(--steps "$SA_STEPS" --stiter "$SA_STITER" --k "$SA_K" --lambda "$SA_LAMBDA")
                 fi
@@ -364,13 +364,8 @@ exp7() {
                                      "$ALG" "$MEJOR_OPS" "${EXTRA_ARGS[@]}")
                 parse_output "$SALIDA"
 
-                # Si tu programa también imprime COSTE_H1= por separado, extráelo:
-                local COSTE_H1
-                COSTE_H1=$(echo "$SALIDA" | grep "COSTE_H1=" | cut -d= -f2)
-                COSTE_H1=${COSTE_H1:-"N/A"}
-
-                echo "7,$RUN,$SEMILLA,$ALG,$PESO,$TIEMPO,$COSTE,$COSTE_H1" >> "$CSV"
-                echo "[EXP7] RUN=$RUN | ALG=$ALG | PESO=$PESO | TIEMPO=$TIEMPO ms | COSTE=$COSTE | H1=$COSTE_H1"
+                echo "7,$RUN,$SEMILLA,$ALG,$PESO,$TIEMPO,$COSTE" >> "$CSV"
+                echo "[EXP7] RUN=$RUN | ALG=$ALG | PESO=$PESO | TIEMPO=$TIEMPO ms | COSTE=$COSTE"
             done
         done
     done
