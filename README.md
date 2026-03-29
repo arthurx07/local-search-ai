@@ -1,6 +1,8 @@
-# local-search-ai
-***TODO: ACTUALIZAR ESTE README.***  
-FIB 2026 Q2 AI Local Search Project  
+# Búsqueda Local IA - FIB 2026 Q2
+
+*Herman Daniel Berrio*
+*Artur Leivar*
+*Marc Pérez*
 
 Para correr el programa existen dos alternativas.  
 
