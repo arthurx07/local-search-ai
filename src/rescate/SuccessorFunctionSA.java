@@ -107,8 +107,9 @@ public class SuccessorFunctionSA implements SuccessorFunction {
             // 3. Limpiamos y validamos
             sucesor.limpiarYReestructurar();
             if (sucesor.esValido()) {
-                // NOTA: El System.out.println() podria colapsar la terminal.
-                System.out.println(nombreOp);
+                if (Main.DEBUG) {
+                    System.out.println(nombreOp);
+                }
                 retval.add(new Successor(nombreOp, sucesor));
             }
         }

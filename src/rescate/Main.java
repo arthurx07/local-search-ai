@@ -14,6 +14,8 @@ import aima.search.informed.SimulatedAnnealingSearch;
 
 public class Main {
 
+    public static Boolean DEBUG = false;
+
     private static class ResultadoBusqueda {
         public long tiempoMs;
         public double costeInicial;
@@ -28,6 +30,8 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         Map<String, String> params = parseArgs(args);
+
+        DEBUG = Boolean.parseBoolean(params.getOrDefault("debug", "false"));
 
         if (params.containsKey("help")) {
             printHelp();
@@ -145,11 +149,13 @@ public class Main {
             long fin = System.nanoTime();
             long tiempoMs = (fin - inicio) / 1_000_000;
 
-            System.out.println();
-            for (Object action : agent.getActions()) {
-                System.out.println(action.toString());
+            if (Main.DEBUG) {
+                System.out.println();
+                for (Object action : agent.getActions()) {
+                    System.out.println(action.toString());
+                }
+                System.out.println(agent.getInstrumentation().toString());
             }
-            System.out.println(agent.getInstrumentation().toString());
 
             // Devolvemos el coste final correcto dependiendo de la heurística
             double costeFinalReal = (tipoHeuristica == 1) ? HeuristicFunction1.mejorCoste : HeuristicFunction2.mejorCoste;
@@ -187,11 +193,13 @@ public class Main {
             long fin = System.nanoTime();
             long tiempoMs = (fin - inicio) / 1_000_000;
             
-            System.out.println();
-            for (Object action : agent.getActions()) {
-                System.out.println(action.toString());
+            if (Main.DEBUG) {
+                System.out.println();
+                for (Object action : agent.getActions()) {
+                    System.out.println(action.toString());
+                }
+                System.out.println(agent.getInstrumentation().toString());
             }
-            System.out.println(agent.getInstrumentation().toString());
             
             // Devolvemos el coste final correcto dependiendo de la heurística
             double costeFinalReal = (tipoHeuristica == 1) ? HeuristicFunction1.mejorCoste : HeuristicFunction2.mejorCoste;
@@ -217,13 +225,19 @@ public class Main {
                 continue;
             }
 
-            // OPCIONES LARGAS: --grupos 100
+            if (a.equals("--debug") || a.equals("-b")) {
+                map.put("debug", "true");
+                continue;
+            }
+
+            // OPCIONES LARGAS:
             if (a.startsWith("--") && i + 1 < args.length) {
                 map.put(a.substring(2), args[i + 1]);
                 i++;
                 continue;
             }
 
+            // OPCIONES CORTAS:
             if (a.startsWith("-") && a.length() == 2 && i + 1 < args.length) {
                 char flag = a.charAt(1);
                 switch (flag) {
@@ -236,7 +250,6 @@ public class Main {
                     case 'a': map.put("algoritmo", args[i + 1]); break;
                     case 'o': map.put("operadores", args[i + 1]); break;
                     
-                    // NUEVAS LETRAS PARA EVITAR CHOQUES
                     case 't': map.put("steps", args[i + 1]); break;      // -t (Total steps)
                     case 'e': map.put("stiter", args[i + 1]); break;     // -e (Evaluations/iterations)
                     case 'k': map.put("k", args[i + 1]); break;          // -k
@@ -278,6 +291,7 @@ public class Main {
         System.out.println("  -d --lambda <n>                       Factor de enfriamiento (default 0.001)");
         System.out.println();
         System.out.println("  -h --help                             Muestra esta ayuda");
+        System.out.println("  -b --debug                            Muestra información extra de la ejecución");
         System.out.println();
     }
 }

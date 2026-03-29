@@ -37,6 +37,7 @@ Opciones específicas para Simulated Annealing:
   -k --k <n>                            Escala de temperatura (default 5)
   -l --lambda <n>                       Factor de enfriamiento (default 0.001)
 
+  -b --debug                            Muestra información extra de la ejecución
   -h --help                             Muestra esta ayuda
 ```
 
