@@ -39,9 +39,9 @@ for alg in algoritmos:
     # Gráfico de Coste vs Peso del segundo criterio
     plt.figure(figsize=(8,5))
     plt.errorbar(grouped["peso_h2"], grouped["coste_mean"], yerr=grouped["coste_std"],
-                 fmt='-o', capsize=5, label=labels[alg])
-    plt.title(f'Coste vs Peso del segundo criterio ({alg})')
-    plt.xlabel('Peso del segundo criterio')
+                 fmt='-o', capsize=5, label=f'{labels[alg]} - Coste')
+    plt.title(f'Coste vs Peso del Heurístico 2({labels[alg]})')
+    plt.xlabel('Peso del Heurístico 2')
     plt.ylabel('Coste medio')
     plt.grid(True)
     plt.legend()
@@ -51,9 +51,9 @@ for alg in algoritmos:
     # Gráfico de Tiempo vs Peso del segundo criterio
     plt.figure(figsize=(8,5))
     plt.errorbar(grouped["peso_h2"], grouped["tiempo_mean"], yerr=grouped["tiempo_std"],
-                 fmt='-o', capsize=5, color='orange', label=f'{alg} - Tiempo')
-    plt.title(f'Tiempo vs Peso del segundo criterio ({alg})')
-    plt.xlabel('Peso del segundo criterio')
+                 fmt='-o', capsize=5, color='orange', label=f'{labels[alg]} - Tiempo')
+    plt.title(f'Tiempo vs Peso del Heurístico 2 ({labels[alg]})')
+    plt.xlabel('Peso del Heurístico 2')
     plt.ylabel('Tiempo medio (ms)')
     plt.grid(True)
     plt.legend()
