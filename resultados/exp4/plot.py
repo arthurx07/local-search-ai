@@ -1,6 +1,18 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# Configuración global de matplotlib
+plt.rcParams.update({
+    'font.size': 12,           # tamaño general de texto
+    'axes.titlesize': 14,      # tamaño de los títulos de los ejes
+    'axes.labelsize': 12,      # tamaño de las etiquetas de los ejes
+    'xtick.labelsize': 12,     # tamaño de los ticks X
+    'ytick.labelsize': 12,     # tamaño de los ticks Y
+    'legend.fontsize': 12,      # tamaño de la leyenda
+    'lines.linewidth': 2,     # grosor de las líneas
+    'lines.markersize': 8     # tamaño de los markers
+})
+
 # Cargar los datos desde el archivo CSV
 df = pd.read_csv("runs.csv")
 
