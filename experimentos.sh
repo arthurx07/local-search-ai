@@ -102,7 +102,7 @@ exp1() {
             echo "[EXP1] RUN=$RUN | OPS=$OPS | TIEMPO=$TIEMPO ms | COSTE=$COSTE"
         done
     done
-    echo "[X] Exp1 completado → $CSV"
+    echo "[X] Exp1 completado -> $CSV"
     echo "   - Revisa el CSV y actualiza MEJOR_OPS al inicio del script."
 }
 
@@ -136,7 +136,7 @@ exp2() {
             echo "[EXP2] RUN=$RUN | INI=$INI | TIEMPO=$TIEMPO ms | COSTE=$COSTE"
         done
     done
-    echo "[X] Exp2 completado → $CSV"
+    echo "[X] Exp2 completado -> $CSV"
     echo "   - Revisa el CSV y actualiza MEJOR_INICIAL al inicio del script."
 }
 
@@ -187,7 +187,7 @@ exp3() {
             done
         done
     done
-    echo "[X] Exp3 completado → $CSV"
+    echo "[X] Exp3 completado -> $CSV"
     echo "   - Busca la fila con menor coste medio y actualiza SA_STEPS, SA_K, SA_LAMBDA."
 }
 
@@ -234,7 +234,7 @@ exp4() {
             CENTROS=$(( CENTROS + CENTROS_INI ))
         done
     done
-    echo "[X] Exp4 completado → $CSV"
+    echo "[X] Exp4 completado -> $CSV"
 }
 
 # =============================================================================
@@ -286,7 +286,7 @@ exp5() {
             CENTROS=$(( CENTROS + CENTROS_AUGM ))
         done
     done
-    echo "[X] Exp5 completado → $CSV"
+    echo "[X] Exp5 completado -> $CSV"
 }
 
 # =============================================================================
@@ -320,7 +320,7 @@ exp6() {
             echo "[EXP6] RUN=$RUN | HELIS=$HELICOPTEROS | TIEMPO=$TIEMPO ms | COSTE=$COSTE"
         done
     done
-    echo "[X] Exp6 completado → $CSV"
+    echo "[X] Exp6 completado -> $CSV"
 }
 
 # =============================================================================
@@ -369,7 +369,7 @@ exp7() {
             done
         done
     done
-    echo "[X] Exp7 completado → $CSV"
+    echo "[X] Exp7 completado -> $CSV"
 }
 
 # =============================================================================
